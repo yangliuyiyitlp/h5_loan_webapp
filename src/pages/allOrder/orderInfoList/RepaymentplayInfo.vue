@@ -15,11 +15,15 @@
          
      </ul>
     </div>
+     <div class='noData' v-if = "repayPlay.length == 0">
+         <NoData ></NoData>
+    </div>
 </div>
     
 </template>
 <script>
 import orderRepayTop from "@/pages/allOrder/orderInfoList/orderRepaymentTop";
+import NoData from "@/components/NoData";
 import api from "@/api/index";
 export default {
   name: "repaymentplayInfo",
@@ -50,6 +54,7 @@ export default {
         });
     },
     queryRepaymentPlan() {
+       this.showToast("加载中",'loading');
       //还款计划列表
       api
         .queryRepaymentPlan({
@@ -67,15 +72,24 @@ export default {
           } else if (res.data.msg == "暂无信息！") {
             this.repayPlay = [];
           }
-        });
+            this.toast.hide();
+        }).catch(err=>{
+          this.showToast("请求失败",'warn');
+          this.toast.hide();
+      });
     }
   },
   components: {
-    orderRepayTop
+    orderRepayTop,
+    NoData
   }
 };
 </script>
 <style scoped  lang="less">
+.noData {
+ top:128px;
+ position: relative;
+}
 .repayPlay {
   ul {
     li {
@@ -86,7 +100,7 @@ export default {
       background-color: #fff;
       box-sizing: border-box;
       div:nth-child(1) {
-        width: 100%;
+        // width: 100%;
         height: 43.5px;
         line-height: 43.5px;
         padding: 0 11px;
@@ -119,9 +133,14 @@ export default {
         box-sizing: border-box;
         float: left;
         margin-top: 22.5px;
+        span {
+          display: inline-block;
+          width:50%;
+          text-align: left;
+        }
         span:nth-child(1) {
           color: rgba(153, 153, 153, 1);
-          margin-right: 22px;
+          // margin-right: 22px;
         }
         span:nth-child(2) {
           color: rgba(64, 64, 64, 1);

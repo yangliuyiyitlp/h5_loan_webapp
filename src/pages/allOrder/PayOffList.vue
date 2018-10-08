@@ -18,7 +18,7 @@ export default {
     return {
       backTitle: "已结清订单",
       tableList: [],
-      toast: null,
+      // toast: null,
       pageSize: 10,
       pageNo: 1,
       searchPararms: {
@@ -26,13 +26,13 @@ export default {
       }
     };
   },
-  created() {
-    this.toast = this.$createToast({
-      time: 1000,
-      txt: "加载中...",
-      mask: true
-    });
-  },
+  // created() {
+  //   this.toast = this.$createToast({
+  //     time: 1000,
+  //     txt: "加载中...",
+  //     mask: true
+  //   });
+  // },
   mounted() {
     this.queryApplyOrderInfoFn();
   },
@@ -52,9 +52,11 @@ export default {
         pageSize: this.pageSize,
         pageNo: this.pageNo,
         orderStatus: 4,
-        queryParam: this.searchPararms.queryParam
+        queryParam: this.searchPararms.queryParam,
+         currentModuleId: this.$route.query.menuId
       };
-      this.toast.show();
+      // this.toast.show();
+      this.showToast('加载中...','loading');
       api.queryApplyOrderInfo(pararms).then(res => {
         this.toast.hide();
         if (res.data.success) {
@@ -62,6 +64,9 @@ export default {
         } else {
           this.tableList = [];
         }
+      }).catch(err=>{
+            this.showToast('请求失败','warn');
+          this.toast.hide();
       });
     },
     onPullingUp(pageNo) {

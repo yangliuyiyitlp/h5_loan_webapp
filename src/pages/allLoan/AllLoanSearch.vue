@@ -24,11 +24,12 @@
                       <div class="search-con com-flex1 com-flex">
                         <div>
                           <input v-model="search.dayBegin"  class ='search-input' placeholder="请输入" />
+                             <i @click='timeBegin'></i>
                         </div>
-                        
                           <span>——</span>
-                          <div>
+                          <div >
                          <input v-model="search.dayEnd"  class ='search-input' placeholder="请输入"  />
+                           <i @click='timeEnd'></i>
                           </div>
                          
                         </div>
@@ -66,7 +67,7 @@ export default {
         return {
           overDueTab: true, //m1 逾期
           title: "逾期天数",
-          tip: "输入的逾期天数起点的天数不能大于终点的天数"
+          tip: "逾期天数起点天数不能大于终点天数"
         };
       }
     }
@@ -82,10 +83,10 @@ export default {
       checked: [],
       orderNode: [],
       search: {
-        dayBegin: "",
-        dayEnd: "",
-        overdueStatusBegin: "",
-        overdueStatusEnd: ""
+        dayBegin: null,
+        dayEnd: null,
+        overdueStatusBegin: null,
+        overdueStatusEnd: null
       },
       orderStatus: [],
       productState: []
@@ -94,6 +95,7 @@ export default {
   mounted() {
     this.queryPageDictionaryDetailFn();
   },
+
   watch: {
     search: {
       handler(val, oldVal) {
@@ -109,6 +111,12 @@ export default {
     }
   },
   methods: {
+    timeBegin() {
+      this.search.dayBegin = "";
+    },
+    timeEnd() {
+      this.search.dayEnd = "";
+    },
     queryPageDictionaryDetailFn() {
       let pararms = {
         code: "000016",
@@ -134,7 +142,7 @@ export default {
         this.showFadeFilter = false;
       }
       if (this.isFil) {
-        this.resetFilter();
+        // this.resetFilter();
         this.showFadeFilter = !this.showFadeFilter;
         this.showFade = false;
       }
@@ -153,28 +161,18 @@ export default {
 
       console.log(this.checked);
     },
-    showToast(txt, toastTime) {
-      const toast = this.$createToast({
-        time: toastTime || 1000,
-        txt: txt,
-        type: "warn",
-        zIndex: 99999
-      });
-      toast.show();
-      setTimeout(() => {
-        toast.hide();
-      }, 1500);
-    },
     submitFn() {
       // 逾期天数 放款天数
-      if (this.search.dayBegin > this.search.dayEnd) {
-        this.showToast(this.allLoanTab.tip);
+      if (+this.search.dayBegin > +this.search.dayEnd) {
+        this.showToast(this.allLoanTab.tip, "warn", 2000);
+        console.log(+this.search.dayBegin);
         return false;
       }
 
       //获取选中的逾期状态
       if (this.checked.length > 2 || this.checked.length == 1) {
-        this.showToast("逾期状态请选择开始和结束2个值");
+        console.log(this.checked);
+        this.showToast("逾期状态请选择开始和结束2个值", "warn", 2000);
         return false;
       }
       function sortNum(a, b) {
@@ -351,7 +349,6 @@ export default {
         }
       }
     }
-
     .search-con {
       align-content: flex-start;
       flex-direction: wrap;
@@ -365,6 +362,7 @@ export default {
         height: 28px;
         line-height: 28px;
         text-align: center;
+        position: relative;
         box-sizing: border-box;
         background: rgba(245, 245, 245, 1);
         border-radius: 16px;
@@ -374,6 +372,15 @@ export default {
       span {
         width: 10%;
         padding: 0 2%;
+      }
+       i {
+        position: absolute;
+        top: 6px;
+        right: 5px;
+        width: 18px;
+        height: 18px;
+        background: url("../../assets/images/bomb_close@3x.png") no-repeat;
+        background-size: 18px 18px;
       }
     }
   }

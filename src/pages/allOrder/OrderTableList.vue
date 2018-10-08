@@ -23,7 +23,8 @@
                   <a v-else :href='"tel:" + val.custMobile' class="js-blue">{{val.custMobile}}</a>
             </div>
           </div>
-          <div class="item-step clearfix" @click='goOrderDetails(val)'>
+          <!-- <div class="item-step clearfix" @click='goOrderDetails(val)'> -->
+          <div class="item-step clearfix"  @click="val.orderStatus != 4?goOrderDetails(val):goNull">
             
               <ul class='orderList' >
                  <li v-if='val.orderStatus == 1'>
@@ -49,7 +50,7 @@
                  <span>挂起时间</span>
                   </li>
                   <li v-if='val.orderStatus ==3'>
-                 <span>1111111111</span>
+                 <span>{{val.loanTime}}</span>
                  <span>放款时间</span>
                   </li>
                   <li v-if='val.orderStatus ==4'>
@@ -57,7 +58,7 @@
                  <span>结清时间</span>
                   </li>
                   <li v-if='val.orderStatus ==5|| val.orderStatus ==10'>
-                 <span>11111111111</span>
+                 <span>{{val.refuseTime}}</span>
                  <span>拒单时间</span>
                   </li>
                    <!-- <li v-if='val.orderStatus ==5|| val.orderStatus ==10'>
@@ -74,7 +75,7 @@
                  <li v-if='val.orderStatus ==5|| val.orderStatus ==10'>
                  <span id='rejectShow' @click.stop="rejectShow(index,val.applyId)">查看</span>
                  <span>拒绝原因</span>
-                 <div :ref='"tip"+ index' v-show='activeIndex==index' class='com_bomb'>{{objRefresed}} <i @click.stop='bombClose(index)'></i></div>
+                 <div :ref='"tip"+ index' v-show='activeIndex==index' class='com_bomb'>{{objRefresed}}<i @click.stop='bombClose(index)'></i></div>
                  
                   </li>
 
@@ -82,25 +83,41 @@
               <!-- 订单状态：1申请中,2审批中,3还款中,4已结清,5拒绝,6线上筹资中,7满标,10退件 -->
               <i class="com-icon-link fr" v-if='val.orderStatus != 4'></i>
             </div> 
-            
-          <div class="item-bottom clearfix">
-              <span class="com-tag" v-if='val.compName'>{{val.compName}}</span>
+
+             <div class="item-bottom clearfix">
+               <span  class="com-tag" v-if='val.compName'>{{val.compName}}</span>
               <span class="com-tag" v-if='val.deptName'>{{val.deptName}}</span>
               <span class="com-tag" v-if='val.empName'>{{val.empName}}</span>
-              <span  v-if = 'tablePermisson.applyTime && val.proName'  class="com-tag js-blue">{{val.proName}}</span>
-              <span v-if = 'tablePermisson.applicationTime && val.cpName' class="com-tag js-blue">{{val.cpName}}</span>
-           
-          </div>
+              <span  v-if = 'tablePermisson.applyTime && val.proName'  class="com-tag js-blue bor-blu">{{val.proName}}</span>
+              <span v-if = 'tablePermisson.applicationTime && val.cpName' class="com-tag js-blue bor-blu">{{val.cpName}}</span>
+             </div>
+            
+          <!-- <div class="item-bottom clearfix bom-scroll">
+            <cube-scroll
+    ref="scrolBom"
+    direction="horizontal">
+            <ul class="list-wrapper">
+              <li class="com-tag" v-if='val.compName'>{{val.compName}}</li>
+              <li class="com-tag" v-if='val.deptName'>{{val.deptName}}</li>
+              <li class="com-tag" v-if='val.empName'>{{val.empName}}</li>
+              <li  v-if = 'tablePermisson.applyTime && val.proName'  class="com-tag js-blue bor-blu">{{val.proName}}</li>
+              <li v-if = 'tablePermisson.applicationTime && val.cpName' class="com-tag js-blue bor-blu">{{val.cpName}}</li>
+           </ul>
+             </cube-scroll>
+          </div> -->
         </div>
           </div>
           </Scroll>
       </div>
+       <NoData v-if = "tableList.length == 0"></NoData>
     </div>
 
 </template>
 <script>
 import Scroll from "@/components/Scroll";
 import api from "@/api/index";
+import NoData from "@/components/NoData";
+import { mapActions } from "vuex";
 import comonFunc from "@/utils/commonFunc";
 export default {
   name: "orderTableList",
@@ -124,7 +141,7 @@ export default {
       pageSize: 10,
       pageNo: 1,
       activeIndex: -1,
-      objRefresed:'',
+      objRefresed: "",
       options: {
         pullDownRefresh: {
           threshold: 50,
@@ -141,12 +158,43 @@ export default {
       }
     };
   },
+  mounted() {},
   created() {},
-  mounted() {
-    console.log(this.$store.state.selectOrder,66666)
-  },
+  // beforeUpdate() {
+
+  //   //底部内容过长滑动
+  //   this.$nextTick(function() {
+  //     let scrollBom = document.getElementsByClassName("item-bottom");
+
+  //     let liArr = [];
+  //     for (let a = 0; a < scrollBom.length; a++) {
+  //       liArr[a] = scrollBom[a].getElementsByTagName("li");
+  //     }
+  //     let liArrLength = [];
+  //     for (let i = 0; i < liArr.length; i++) {
+  //       let liLength =0;
+  //       for (let j = 0; j < liArr[i].length; j++) {
+  //         console.log(liArr[i][j].offsetWidth)
+  //         liLength += liArr[i][j].offsetWidth + 10;
+  //       }
+  //       liArrLength.push(liLength);
+  //     }
+  //     console.log(liArrLength);
+  //     let scrollDiv = document.getElementsByClassName("cube-scroll-content");
+  //     console.log(scrollDiv);
+  //     for (let k = 1; k < scrollDiv.length; k++) {
+  //       if (scrollDiv[k].offsetWidth < liArrLength[k - 1]) {
+  //         scrollDiv[k].style.width = liArrLength[k - 1] + "px";
+  //         console.log( scrollDiv[k].style.width)
+  //       }
+  //     }
+  //   });
+  // },
   methods: {
-      checkPhone() {
+    ...mapActions({
+      setItemObj: "SET_ITEM_OBJ"
+    }),
+    checkPhone() {
       return comonFunc.checkPhone;
     },
     rejectShow(index, crmApplayId) {
@@ -180,18 +228,22 @@ export default {
         .then(res => {
           if (res.data.success) {
             if (res.data.data) {
-              this.objRefresed = res.data.data.refusalReason || '暂无数据';
+              this.objRefresed = res.data.data.refusalReason || "暂无数据";
             }
           } else {
-             this.objRefresed = '暂无数据';
+            this.objRefresed = "暂无数据";
           }
         });
     },
     bombClose(index) {
       this.activeIndex = -1;
     },
-
+    goNull() {
+      return false;
+    },
     goOrderDetails(val) {
+      val.orderType = "orderType"; //区分是从订单模块进到基本信息
+      this.setItemObj(val);
       this.$router.push({
         path: "/OrderDetails",
         query: {
@@ -201,14 +253,14 @@ export default {
         }
       });
     },
-    toTop(){
-       this.$refs.scroll.$refs.scroll.scrollTo(0, 10, 500);
+    toTop() {
+      this.$refs.scroll.$refs.scroll.scrollTo(0, 10);
     },
     onPullingDown() {
       setTimeout(() => {
         this.pageNo = 1;
         this.$emit("onPullingDown", this.pageNo);
-        this.$refs.scroll.$refs.scroll.scrollTo(0, 10, 500);
+        this.$refs.scroll.$refs.scroll.scrollTo(0, 10);
       }, 1000);
     },
     onPullingUp() {
@@ -219,7 +271,7 @@ export default {
     }
   },
   watch: {},
-  components: { Scroll }
+  components: { Scroll, NoData }
 };
 </script>
 <style  lang="less" scoped>
@@ -283,9 +335,11 @@ export default {
   }
   .item-pad {
     font-size: 17px;
-    padding: 0 10px;
-    height: 46px;
-    line-height: 46px;
+    padding: 12px 10px;
+    // margin-right:76px;
+    // padding: 0 10px;
+    // height: 46px;
+    // line-height: 46px;
     border-bottom: 1px solid #e5e5e5;
     .item-name {
       color: #333333;
@@ -314,18 +368,21 @@ export default {
       //     }
       //   }
       .com_bomb {
-        width: 190px;
-        height: 70px;
-        line-height: 50px;
+        width: 150px;
+        min-height: 70px;
+        // line-height: 50px;
+        // display:table-cell;
+        // vertical-align:middle;
+        // text-align:center;
         right: 97px;
         top: 20px;
         text-align: center;
         position: absolute;
         background: url("../../assets/images/bomb_box@3x.png") no-repeat;
-        background-size: cover;
+        background-size: contain;
         z-index: 99;
         box-sizing: border-box;
-        padding: 10px 20px 10px 10px;
+        padding: 20px 20px 10px 25px;
         i {
           width: 15px;
           height: 15px;
@@ -348,13 +405,12 @@ export default {
         display: block;
         color: #404040;
         font-size: 13px;
-       
       }
       span:nth-child(2) {
         display: block;
         color: #a8a8a8;
         font-size: 12px;
-         margin-top: 10px;
+        margin-top: 10px;
       }
       #rejectShow {
         color: #0e7fff;
@@ -372,15 +428,13 @@ export default {
     }
   }
   .item-bottom {
-    padding: 10px;
-    font-size: 0;
+    padding: 8px;
     .com-tag {
-      margin-right: 10px;
-      margin-top: 4px;
-      &:nth-child(4) {
-        margin-right: 0;
-        border: 1px solid #0e7fff;
-      }
+      margin: 2px 4px 2px 0;
+    }
+    .bor-blu {
+      margin-right: 0;
+      border: 1px solid #0e7fff;
     }
   }
 }
@@ -389,6 +443,33 @@ export default {
     margin-bottom: 9px;
   }
 }
+.martop {
+  .com-scroll {
+    top: 110px;
+  }
+}
 </style>
 
 
+// <style lang="less">
+// .bom-scroll {
+//   .cube-scroll-content {
+//     display: inline-block;
+//     // width: 130%;
+//     .cube-scroll-list-wrapper {
+//       width: 100%;
+//     }
+//     .list-wrapper {
+//       width: 100%;
+//       position: relative;
+//       overflow: hidden;
+//       white-space: nowrap;
+//     }
+//     li {
+//       display: inline-block;
+//     }
+//   }
+// }
+//
+//
+</style>

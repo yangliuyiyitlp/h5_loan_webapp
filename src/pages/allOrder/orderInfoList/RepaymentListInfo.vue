@@ -4,31 +4,36 @@
     <div class='repayRecord'>
         <ul>
             <li v-for='(val,i) in PaymentHistory' :key='i'>
-                 <div class='recordLeft'><span>{{val.paymentChannel}}</span><span>{{val.paymentTime}}2</span></div>
+                 <div class='recordLeft'><span>{{val.paymentChannel}}</span><span>{{val.paymentTime}}</span></div>
                 <div class='recordRg'>{{val.shouldMoney}}元</div>
             </li>
         </ul>
     </div>
+     <div class='noData' v-if = "PaymentHistory.length == 0">
+         <NoData ></NoData>
+    </div>
+    
 </div>
     
 </template>
 <script>
 import orderRepayTop from "@/pages/allOrder/orderInfoList/orderRepaymentTop";
+import NoData from "@/components/NoData";
 import api from "@/api/index";
 export default {
   name: "repaymentListInfo",
   data() {
     return {
       backTitle: "还款记录",
-       orderRepayTop: {},
-       PaymentHistory:[]
+      orderRepayTop: {},
+      PaymentHistory: []
     };
   },
-  mounted(){
-    this.queryQueryOrderAmountt()
-    this.queryPaymentHistory()
+  mounted() {
+    this.queryQueryOrderAmountt();
+    this.queryPaymentHistory();
   },
- methods:{
+  methods: {
     queryQueryOrderAmountt() {
       //还款记录头部
       api
@@ -43,7 +48,9 @@ export default {
           }
         });
     },
-      queryPaymentHistory() {//还款记录列表
+    queryPaymentHistory() {
+      //还款记录列表
+      this.showToast("加载中", "loading");
       api
         .queryPaymentHistory({
           crmApplayId: this.$route.query.crmApplayId
@@ -52,19 +59,28 @@ export default {
           this.PaymentHistory = [];
           if (res.data.success) {
             this.PaymentHistory = res.data.data;
-          }   else if(res.data.msg=='暂无信息！'){
-            this.PaymentHistory = []
+          } else if (res.data.msg == "暂无信息！") {
+            this.PaymentHistory = [];
           }
-        
+          this.toast.hide();
+        })
+        .catch(err => {
+          this.showToast("请求失败", "warn");
+          this.toast.hide();
         });
-    },
- },
+    }
+  },
   components: {
-    orderRepayTop
+    orderRepayTop,
+    NoData
   }
 };
 </script>
 <style scoped  lang="less">
+.noData {
+ top:128px;
+ position: relative;
+}
 .repayRecord {
   ul {
     li {
@@ -91,7 +107,6 @@ export default {
         span:nth-child(2) {
           font-size: 11px;
           color: rgba(168, 168, 168, 1);
-         
         }
       }
       .recordRg {
@@ -99,7 +114,7 @@ export default {
         line-height: 71px;
         font-size: 17px;
         color: rgba(64, 64, 64, 1);
-          // margin-top: 22.5px;
+        // margin-top: 22.5px;
       }
     }
   }

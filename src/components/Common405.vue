@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div  class="com-fs12">
     {{msg}}
   </div>
 </template>

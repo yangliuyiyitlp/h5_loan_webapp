@@ -8,7 +8,11 @@
         <li><router-link to="/baseInformain">基本信息<i class="com-icon-link fr"></i></router-link></li>
         <li><router-link to="/relationInformain">联系人信息<i class="com-icon-link fr"></i></router-link></li>
         <li><router-link to="/accountInformain">账户信息<i class="com-icon-link fr"></i></router-link></li>
-        <li v-if = 'showOreder'><router-link to="/customerDet">订单信息<i class="com-icon-link fr"></i></router-link></li>
+        <li v-if = 'showOreder'>
+          <router-link :to="{ path:'/AllOrderList', query: {fromCustDet:'fromCustDet',crmCustInfoId: custItem.crmCustInfoId} }">
+          订单信息<i class="com-icon-link fr"></i>
+          </router-link>
+        </li>
       </ul>
     </div>
   </div>
@@ -32,7 +36,8 @@ export default {
   },
   created() {
     this.getItemObj();
-    console.log(this.$store.state.custItem);
+    this.custItem = this.$store.state.custItem;
+    console.log( this.custItem," this.getItemObj() this.getItemObj()");
   },
   methods: {
     ...mapActions({

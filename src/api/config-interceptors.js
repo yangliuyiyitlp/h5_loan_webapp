@@ -57,11 +57,11 @@ Axios.interceptors.response.use(
                     router.push({ path: '/500' });
                     break;
 	            default :
-                    vm.$message({
-                        duration: 5000,
-                    	type: 'warning',
-                   		message: error.response.status + " " + error.response.statusText
-                	})
+                    // vm.$message({
+                    //     duration: 5000,
+                    // 	type: 'warning',
+                   	// 	message: error.response.status + " " + error.response.statusText
+                	// })
 
             }
 

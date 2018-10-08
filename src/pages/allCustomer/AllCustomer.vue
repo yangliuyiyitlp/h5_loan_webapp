@@ -5,10 +5,10 @@
           <ComcomTitle :title = 'title'></ComcomTitle>
           <div class="com-tab clearfix">    
             <div class="fl w50per">
-              <span :class="{active: !isPerTeam}" @click = "tabClick">个人客户</span>
+              <span :class="{active: !isPerTeam}" @click = "tabClick(!isPerTeam)">个人客户</span>
             </div>        
             <div class="fl w50per">
-              <span :class="{active: isPerTeam}"  @click = "tabClick">团队客户</span>
+              <span :class="{active: isPerTeam}"  @click = "tabClick(isPerTeam)">团队客户</span>
             </div>
           </div>
         </div>
@@ -18,46 +18,46 @@
         <ul class="clearfix">
           <!-- 1未实名,2已实名,3已成交 -->          
           <li class="fl"> 
-            <router-link :to="{path:'/allCustomerList',query: {type: 'allCust',oneSelf: isPerTeam}}">
+            <router-link :to="{path:'/allCustomerList',query: {type: 'allCust',oneSelf: !isPerTeam}}">
               <div class="icon-content">
                 <img src="../../assets/images/icon_all_customers@3x.png" alt="">
               </div>
               <div class="cust-con-bot">
                 <div class="cust-des">全部客户</div>
-                <div class="cust-total">(1221)</div>
+                <div class="cust-total">({{objAccount.allCount}})</div>
               </div>
             </router-link>
           </li>
           <li class="fl">
-            <router-link :to="{path:'/allCustomerList',query: {custStatus: '1',oneSelf: isPerTeam}}">
+            <router-link :to="{path:'/allCustomerList',query: {custStatus: '1',oneSelf: !isPerTeam}}">
               <div class="icon-content">
                 <img src="../../assets/images/icon_unnamed_customer@3x.png" alt="">
               </div>
               <div class="cust-con-bot">
                 <div class="cust-des">未实名客户</div>
-                <div class="cust-total">(1221)</div>
+                <div class="cust-total">({{objAccount.notRealCount}})</div>
               </div>
             </router-link>              
           </li>
           <li class="fl">
-            <router-link :to="{path:'/allCustomerList',query: {custStatus: '2',oneSelf: isPerTeam}}">
+            <router-link :to="{path:'/allCustomerList',query: {custStatus: '2',oneSelf: !isPerTeam}}">
               <div class="icon-content">
                 <img src="../../assets/images/icon_real_name_client@3x.png" alt="">
               </div>
               <div class="cust-con-bot">
                 <div class="cust-des">已实名客户</div>
-                <div class="cust-total">(1221)</div>
+                <div class="cust-total">({{objAccount.realNameCount}})</div>
               </div>
             </router-link>
           </li>
           <li class="fl">
-            <router-link :to="{path:'/allCustomerList',query: {custStatus: '3',oneSelf: isPerTeam}}">
+            <router-link :to="{path:'/allCustomerList',query: {custStatus: '3',oneSelf: !isPerTeam}}">
               <div class="icon-content">
                 <img src="../../assets/images/icon_customer_transaction@3x.png" alt="">
               </div>
               <div class="cust-con-bot">
                 <div class="cust-des">已成交客户</div>
-                <div class="cust-total">(1221)</div>
+                <div class="cust-total">({{objAccount.successCount}})</div>
               </div>
             </router-link>              
           </li>
@@ -68,6 +68,7 @@
 
 <script>
 import ComcomTitle from "@/components/CommonTitle"
+import api from "@/api/index";
 export default {
   name: 'allCustomer',  
   data () {
@@ -75,7 +76,14 @@ export default {
       title: '客户管理',
       isPer: true,
       isTeam: false,
-      isPerTeam: false
+      isPerTeam: false,
+      objAccount: {
+        "realNameCount": 0,
+        "successCount": 0,
+        "notRealCount": 0,
+        "allCount": 0
+      },
+      // loadingObj: null
     }
   }, 
   methods: {
@@ -85,12 +93,35 @@ export default {
     tabClick(type) {
       // this.isPer = type == "isPer"? true : false
       // this.isTeam = type == "isTeam"? true : false
-      this.isPerTeam = !this.isPerTeam
+      console.log(type,"type")
+      if (!type) {
+        this.isPerTeam = !this.isPerTeam
+        this.queryCustCountFn()
+      }
       
-    }
+    },
+    queryCustCountFn() {
+     this.showToast('加载中...','loading');
+      let pararms = {
+        oneSelf: !this.isPerTeam
+      }      
+      api.queryCustCount(pararms).then(res => {        
+        setTimeout(() => {
+           this.toast.hide();
+        },300)
+        if (res.data.success) {
+          this.objAccount = res.data.data
+        } else {
+          this.objAccount =  {}
+           this.showToast('客户数获取失败','warn');
+        }
+      }).catch(err => {
+          this.showToast('客户数获取异常','warn');
+        });
+    },
   },
   mounted() {
-
+   this.queryCustCountFn()
   },
   watch: {
   },

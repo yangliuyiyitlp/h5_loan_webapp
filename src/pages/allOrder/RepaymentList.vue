@@ -18,7 +18,7 @@ export default {
     return {
       backTitle: "还款中订单",
       tableList: [],
-      toast: null,
+      // toast: null,
       pageSize: 10,
       pageNo: 1,
       searchPararms: {
@@ -26,13 +26,13 @@ export default {
       }
     };
   },
-  created() {
-    this.toast = this.$createToast({
-      time: 1000,
-      txt: "加载中...",
-      mask: true
-    });
-  },
+  // created() {
+  //   this.toast = this.$createToast({
+  //     time: 1000,
+  //     txt: "加载中...",
+  //     mask: true
+  //   });
+  // },
   mounted() {
     this.queryApplyOrderInfoFn();
   },
@@ -40,29 +40,37 @@ export default {
     searchFn(val) {
       //文本框搜索
       console.log(val, 90909);
-       this.pageNo = 1
+      this.pageNo = 1;
       this.searchPararms.queryParam = val;
       this.tableList = [];
       this.queryApplyOrderInfoFn();
-      this.$refs.orderTab.toTop()
+      this.$refs.orderTab.toTop();
     },
     queryApplyOrderInfoFn() {
       const pararms = {
-         oneSelf:this.$route.query.oneSelf,
+        oneSelf: this.$route.query.oneSelf,
         pageSize: this.pageSize,
         pageNo: this.pageNo,
         orderStatus: 3,
-        queryParam: this.searchPararms.queryParam
+        queryParam: this.searchPararms.queryParam,
+         currentModuleId: this.$route.query.menuId
       };
-      this.toast.show();
-      api.queryApplyOrderInfo(pararms).then(res => {
-        this.toast.hide();
-        if (res.data.success) {
-          this.tableList = this.tableList.concat(res.data.data);
-        } else {
-          this.tableList = [];
-        }
-      });
+      // this.toast.show();
+       this.showToast("加载中",'loading');
+      api
+        .queryApplyOrderInfo(pararms)
+        .then(res => {
+          this.toast.hide();
+          if (res.data.success) {
+            this.tableList = this.tableList.concat(res.data.data);
+          } else {
+            this.tableList = [];
+          }
+        })
+        .catch(err => {
+          this.showToast("请求失败",'warn');
+          this.toast.hide();
+        });
     },
     onPullingUp(pageNo) {
       this.pageNo = pageNo;

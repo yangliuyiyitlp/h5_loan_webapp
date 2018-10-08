@@ -21,11 +21,13 @@
             </li>
             <li>
               <span>账户余额</span>
-              <p>
+              <p v-if = 'accountFlag'>--</p>
+              <p  v-if = '!accountFlag'>
                 <span v-if = '!orShowAccount'>****元</span>
-                 <span v-if = 'orShowAccount'>{{accountMoney}}元</span>
+                <span v-else>{{accountMoney}}元</span>
                 <i class="icon-accout" :class="[!orShowAccount?'':'icon-accout-active']" @click = 'tabAccount'></i>
               </p>
+              
             </li>
           </ul>
           <div class="work-tit">
@@ -59,11 +61,12 @@ export default {
   //   showCustFollow
   data() {
     return {
-      backTitle: "基本信息",
+      backTitle: "账户信息",
+      accountFlag: false,
       orShowAccount: false,
       accoutInfo: {},
       custItem: {},
-      accountMoney: null
+      accountMoney: ''
     };
   },
   created() {
@@ -78,19 +81,23 @@ export default {
     tabAccount() {
         this.orShowAccount = !this.orShowAccount
         if (this.orShowAccount) {
-          this.queryAccountInfo()
+          this.queryAccountBalanceFn()
         }
-    },
+    },   
     queryAccountInfo(){
       let pararms = {}
       if (this.custItem.hasOwnProperty("orderType") && this.custItem.orderType == "orderType") {
-        //订单的基本信息
+        //订单的账户信息
         pararms.crmApplayId = this.custItem.applyId;
       }
       if (this.custItem.hasOwnProperty("custType") && this.custItem.custType == "custType") {
-        //客户的基本信息
+        //客户的账户信息
         pararms.crmCustInfo = this.custItem.crmCustInfoId;
         console.log(8888);
+      }
+       if (this.custItem.hasOwnProperty("loanType") && this.custItem.loanType == "loanType") {
+        //贷后的账户信息
+        pararms.crmApplayId = this.custItem.crmApplyId;
       }
       this.accoutInfo = {}
   		api.queryAccountInfo(pararms).then((res) =>{
@@ -98,23 +105,31 @@ export default {
           if (res.data.data != null) {
             this.accoutInfo = res.data.data
           }
-				}
+				} else {
+          this.accountFlag = true
+          console.log(this.accountFlag)
+        }
 			})
     },
     queryAccountBalanceFn(){//账户余额
       let pararms = {}
-      if (this.custItem.hasOwnProperty("orderType") && this.custItem.orderType == "orderType") {
-        //订单的账户余额
+       if (this.custItem.hasOwnProperty("orderType") && this.custItem.orderType == "orderType") {
+        //订单的账户信息
         pararms.crmApplayId = this.custItem.applyId;
       }
       if (this.custItem.hasOwnProperty("custType") && this.custItem.custType == "custType") {
-        //客户的账户余额
+        //客户的账户信息
         pararms.crmCustInfo = this.custItem.crmCustInfoId;
         console.log(8888);
       }
+       if (this.custItem.hasOwnProperty("loanType") && this.custItem.loanType == "loanType") {
+        //贷后的账户信息
+        pararms.crmApplayId = this.custItem.crmApplyId;
+      }
 			api.queryAccountBalance(pararms).then(res => {
 				if(res.data.success){
-					this.accountMoney = res.data.data
+          this.accountMoney = res.data.data
+          console.log(this.accountMoney )
 				}
 			})
 		},

@@ -31,29 +31,50 @@
             <span>注册时间</span>
             <p>{{userInfo.regTime}}</p>
           </li>
-          <li v-if = 'custItem.hasOwnProperty("orderType") && custItem.custType == "orderType"'>
+          <li v-if = 'custItem.hasOwnProperty("orderType") && custItem.orderType == "orderType"'>
             <!-- 订单 -->
             <span>姓名</span>
             <p>{{orderBaseInfo.custName}}</p>
           </li>
-          <li v-if = 'custItem.hasOwnProperty("orderType") && custItem.custType == "orderType"'>
+          <li v-if = 'custItem.hasOwnProperty("orderType") && custItem.orderType == "orderType"'>
             <!-- 订单 -->
             <span>身份证号码</span>
             <p>{{orderBaseInfo.custIc}}</p>
           </li>
-          <li v-if = 'custItem.hasOwnProperty("orderType") && custItem.custType == "orderType"'>
-            <!-- 订单 -->
-            <span>申请时间：</span>
-            <p>{{orderBaseInfo.createTime}}</p>
-          </li>
-          <li v-if = 'custItem.hasOwnProperty("orderType") && custItem.custType == "orderType"'>
+           <li v-if = 'custItem.hasOwnProperty("orderType") && custItem.orderType == "orderType"'>
             <!-- 订单 -->
             <span>申请城市：</span>
             <p>{{orderBaseInfo.provId}} {{orderBaseInfo.cityId}}</p>
           </li>
+          <li v-if = 'custItem.hasOwnProperty("orderType") && custItem.orderType == "orderType"'>
+            <!-- 订单 -->
+            <span>申请时间：</span>
+            <p>{{orderBaseInfo.createTime}}</p>
+          </li>
+         
            <!-- <span v-if="orderBaseInfo.custIc !=='-'">身份证号：{{orderBaseInfo.custIc}}</span>
           申请时间：<span>{{orderBaseInfo.createTime}}</span>
           申请城市：<span>{{orderBaseInfo.provId}} {{orderBaseInfo.cityId}}</span> -->
+          <li v-if = 'custItem.hasOwnProperty("loanType") && custItem.loanType == "loanType"'>
+            <!-- 贷后 -->
+            <span>姓名</span>
+            <p>{{orderBaseInfo.custName}}</p>
+          </li>
+          <li v-if = 'custItem.hasOwnProperty("loanType") && custItem.loanType == "loanType"'>
+            <!-- 贷后 -->
+            <span>身份证号码</span>
+            <p>{{orderBaseInfo.custIc}}</p>
+          </li>
+          <li v-if = 'custItem.hasOwnProperty("loanType") && custItem.loanType == "loanType"'>
+            <!-- 贷后 -->
+            <span>申请时间：</span>
+            <p>{{orderBaseInfo.createTime}}</p>
+          </li>
+          <li v-if = 'custItem.hasOwnProperty("loanType") && custItem.orderType == "loanType"'>
+            <!-- 贷后 -->
+            <span>申请城市：</span>
+            <p>{{orderBaseInfo.provId}} {{orderBaseInfo.cityId}}</p>
+          </li>
           <li>
             <span>性别</span>
             <p>{{userBaseInfo.icSex == 1?'男':userBaseInfo.icSex == 2?'女':''}}</p>
@@ -235,13 +256,14 @@ export default {
   created() {
     this.getItemObj();
     this.custItem = this.$store.state.custItem;
-    // console.log(this.$store.state.custItem);
+    console.log(this.$store.state.custItem,1111111);
   },
   mounted() {
     this.queryEssentialInfoFn();
-    this.getCustDetailBase();
-    if (this.custItem.hasOwnProperty("orderType") && this.custItem.orderType == "orderType") {
-      //客户详细信息
+    if (this.custItem.hasOwnProperty("custType")) {
+      //客户详细信息      
+      this.getCustDetailBase();
+    } else {
       this.queryBaseOrderInfo()
     }
   },
@@ -249,15 +271,26 @@ export default {
     queryEssentialInfoFn() {
       //基本信息
       let pararms = {};
-      if (this.custItem.hasOwnProperty("orderType") && this.custItem.orderType == "orderType") {
-        //订单的基本信息
-        pararms.crmApplayId = this.custItem.applyId;
-      }
-      if (this.custItem.hasOwnProperty("custType") && this.custItem.custType == "custType") {
+       if (this.custItem.hasOwnProperty("custType") && this.custItem.custType == "custType") {
         //客户的基本信息
         pararms.crmCustInfo = this.custItem.crmCustInfoId;
-        console.log(8888);
       }
+      if (this.custItem.hasOwnProperty("orderType") && this.custItem.orderType == "orderType") {
+        //订单的基本信息
+        // pararms.crmApplayId = this.custItem.applyId; 
+        pararms.crmApplayId = this.custItem.applyId;
+      }     
+     
+      if (this.custItem.hasOwnProperty("loanType") && this.custItem.loanType == "loanType") {
+        //贷后的基本信息
+        pararms.crmApplayId = this.custItem.crmApplyId;
+      }
+      //  else {
+      //   //订单,贷后的基本信息       
+      //   pararms.crmApplayId = this.$route.query.crmApplayId;
+      // }
+      this.userBaseInfo = {}
+      this.jobNature = null
       api.queryEssentialInfo(pararms).then(res => {
         if (res.data.code == 1) {
           this.userBaseInfo = res.data.data;
@@ -284,7 +317,7 @@ export default {
     queryBaseOrderInfo() {
       //订单详细信息（包括贷后）
       let pararms = {
-        crmApplayId: this.$route.query.applyId
+        crmApplayId: this.$route.query.crmApplayId
       };
       this.orderBaseInfo = {};
       api.queryBaseOrderInfo(pararms).then(res => {
@@ -292,6 +325,7 @@ export default {
           if (res.data.data != null) {
             this.orderBaseInfo = res.data.data;
           }
+          console.log(this.orderBaseInfo,"this.orderBaseInfo")
         }
       });
     },
@@ -345,12 +379,12 @@ export default {
       padding: 0 0 0 12px;
       z-index: 1212;
       &:nth-child(2n + 1) {
-        height: 36px;
+        // height: 36px;
         line-height: 36px;
         background-color: #fff;
       }
       &:nth-child(2n) {
-        height: 34px;
+        // height: 34px;
         line-height: 34px;
         background: rgba(248, 248, 248, 1);
       }
@@ -360,9 +394,10 @@ export default {
       p {
         flex: 1;
         color: #595959;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
+        // overflow: hidden;
+        // text-overflow: ellipsis;
+        // white-space: nowrap;
+        word-wrap:break-word;
         &.com-color-blue {
           color: #0e7fff;
         }
@@ -390,9 +425,10 @@ export default {
     }
     .ul-wrap {
       li {
-        line-height: 13px;
-        height: 13px;
-        margin-bottom: 23px;
+        line-height: 20px;
+        // line-height: 13px;
+        // height: 13px;
+        margin-bottom: 16px;
         background-color: #fff;
       }
     }

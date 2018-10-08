@@ -5,14 +5,14 @@
         <div class="filter-data" v-if ='showFilterDate'>
           <ul class="clearfix">
             <li>
-              <span :class="{active:isTimer}" @click = 'filterTab("isTimer")'>注册时间排序<i></i></span>
+              <span :class="{active:isTimer}" @click = 'filterTab("isTimer")'>{{filterTit}}<i></i></span>
               <transition name="fade">
                 <div class="or-show-filter" v-show="showFade">
                   <div class="filter-pad">
-                    <div class="filter-item" @click = 'clickItem' :class="{activeBg:clickItemFlag}">
+                    <div class="filter-item" @click = 'clickItem(clickItemFlag,1)' :class="{activeBg:clickItemFlag}">
                       <p>注册时间排序<span></span></p>
                     </div>
-                    <div class="filter-item" @click = 'clickItem' :class="{activeBg: !clickItemFlag}">
+                    <div class="filter-item" @click = 'clickItem(!clickItemFlag,2)' :class="{activeBg: !clickItemFlag}">
                       <p>最后登录时间排序<span></span></p>
                     </div>
                   </div>
@@ -43,15 +43,16 @@
                       <div class="search-con com-flex1 com-flex">
                         <div class="search-pad com-bg">
                           <span>
-                            <i class="icon-search" ></i>
+                            <i class="icon-search" @click="searchCity"></i>
                           </span>
-                          <input type="text" placeholder="请输入城市进行搜索" v-model="searchCon">                       
+                          <input type="text" placeholder="请输入城市进行搜索" v-model="searchCon">    
+                               <i class='icon-clear' @click='searchClear'></i>                   
                         </div>
                         <br>
                         <div class="citys">
                           <div class="clearfix ul-wrap">
-                            <span v-for = "(item, index) in 50" :key = 'index' @click = 'selectCustFn(item,"city",$event,index)'>
-                              {{item}}
+                            <span v-for = "(item, index) in arrCity" :key = 'index' @click = 'selectCustFn(item,"city",$event,index,item)'>
+                              {{item.cityName}}
                             </span>                          
                           </div>
                         </div>
@@ -77,7 +78,7 @@
           @onPullingUp="onPullingUp"
           >
           <div class="wrap_con" slot="scollCon">				    	
-            <div class="cust-list-item" v-for = '(item,ind) in data'  @click='tab' :key='ind'>
+            <div class="cust-list-item"  @click.prevent.stop = 'goCustDetail(item)' v-for = '(item,ind) in data'   :key='ind'>
               <!-- 1未实名,2已实名,3已成交 -->
               <i class="cust-icon" 
               :class='{"cust-icon-no-realName":item.custStatusCode==1,"cust-icon-realName":item.custStatusCode==2,"cust-icon-done":item.custStatusCode==3 }'
@@ -85,13 +86,13 @@
               </i>
               <div class="list-item-top item-pad">
                 <div class="item-title">
-                  <span class="item-name">{{item.custName}}</span>
+                  <span class="item-name">{{item.custName}}<span v-if="item.orderNumber != 0 && item.custStatusCode != 1">[{{item.orderNumber}}]</span></span>
                   <a v-if='checkPhone(item.custMobile)' class="item-phone">{{item.custMobile}}</a>
                   <a v-else :href='"tel:" + item.custMobile' class="item-phone">{{item.custMobile}}</a>
                 </div>
               </div>
-              <div @click.prevent.stop = 'goCustDetail(item)'>
-                <div class="item-time">注册时间：{{item.registrationTime}}<i class="com-icon-link fr"></i></div>
+              <div >
+                <div class="item-time" >注册时间：{{item.registrationTime}}<i class="com-icon-link fr"></i></div>
                 <div class="item-bottom clearfix">
                     <span class="com-tag" v-if='item.compName'>{{item.compName}}</span>
                     <span class="com-tag" v-if='item.deptName'>{{item.deptName}}</span>
@@ -104,6 +105,7 @@
 		    </Scroll>
         
       </div>
+      <NoData v-if = "data.length == 0"></NoData>
     </div>
 </template>
 
@@ -111,7 +113,8 @@
 import CommonSearch from "@/components/CommonSearch";
 import CommonResetBtn from "@/components/CommonResetBtn";
 import Scroll from "@/components/Scroll";
-import { mapActions} from 'vuex'
+import NoData from "@/components/NoData";
+import { mapActions } from "vuex";
 import api from "@/api/index";
 import comonFunc from "@/utils/commonFunc";
 console.log(comonFunc);
@@ -165,7 +168,11 @@ export default {
       toast: null,
       showFilterDate: false,
       custStatus: "",
-      queryParam: ""
+      queryParam: "",
+      orderByName: 1, //排序字段 (注册时间:1 登录时间 :2)
+      arrCity: [],
+      cityId: "",
+      filterTit: "注册时间排序"
     };
   },
   created() {
@@ -175,25 +182,44 @@ export default {
       mask: true
     });
     this.checkTypeCustList();
+    this.queryHotCityFn();
   },
   mounted() {
     this.queryCustInfoDataFn();
   },
   methods: {
+    searchClear() {
+      this.searchCon = "";
+    },
     ...mapActions({
-      setItemObj: 'SET_ITEM_OBJ'
+      setItemObj: "SET_ITEM_OBJ"
     }),
-    goCustDetail(item) {// 进入客户详情    
-    item.custType = 'custType' //区分是从客户进到基本信息
-    this.setItemObj(item)
+    searchCity() {
+      this.cityId = "";
+      this.queryHotCityFn();
+    },
+    queryHotCityFn() {
+      let pararms = {
+        cityName: this.searchCon
+      };
+      api.queryHotCity(pararms).then(res => {
+        if (res.data.success) {
+          this.arrCity = res.data.data;
+        }
+      });
+    },
+    goCustDetail(item) {
+      // 进入客户详情
+      item.custType = "custType"; //区分是从客户进到基本信息
+      this.setItemObj(item);
       this.$router.push({
-        path: '/customerDet',
+        path: "/customerDet"
         // query: {
         //   crmCustInfoId: item.crmCustInfoId
         // }
-      })
+      });
     },
-    selectCustFn(flag, type, $event, targetIndex) {
+    selectCustFn(flag, type, $event, targetIndex, item) {
       // noRealName: true,
       // realName: false,
       // traded: false,
@@ -206,7 +232,7 @@ export default {
       if (type == "traded") {
         this.traded = !this.traded;
       }
-      console.log(this.noRealName, this.realName, this.traded, "====");
+      // console.log(this.noRealName, this.realName, this.traded, "====");
       if (type == "regType") {
         // 注册类型
         if ($event.target.className.indexOf("check-select") > -1) {
@@ -229,8 +255,10 @@ export default {
         if ($event.target.className.indexOf("check-select") > -1) {
           $event.target.className = "";
           this.applyCity = null;
+          this.cityId = "";
         } else {
           $event.target.className = "check-select";
+          this.cityId = item.cityId;
           this.applyCity = targetIndex;
           let ele = document.getElementsByClassName("ul-wrap")[0];
           let childEleSpan = ele.getElementsByTagName("span");
@@ -241,10 +269,11 @@ export default {
           }
         }
       }
-      console.log(this.applyCity , "applyCity");
-      console.log(this.regType , "regType");
+      // console.log(this.applyCity , "applyCity");
+      console.log(this.cityId, "regType");
     },
-    checkTypeCustList() {// 全部，未实名，实名，成交客户列表
+    checkTypeCustList() {
+      // 全部，未实名，实名，成交客户列表
       let pararms = this.$route.query;
       if (pararms.type && pararms.type == "allCust") {
         //全部客户
@@ -269,12 +298,12 @@ export default {
       return comonFunc.checkPhone;
     },
     search(val) {
-      this.queryParam = val
-      this.onPullingDown()
+      this.queryParam = val;
+      this.onPullingDown();
       console.log(val, 90909);
     },
     clearFn() {
-      this.queryParam = ''
+      this.queryParam = "";
     },
     filterTab(type) {
       // this.isTimer = type == "isTimer" ? true : false;
@@ -289,37 +318,47 @@ export default {
       }
       this.showFade = this.isTimer ? true : false;
       this.showFadeFilter = this.isFil ? true : false;
-      if (this.showFadeFilter) {
-        this.resetFilter()
-      }
+      // if (this.showFadeFilter) {
+      //   this.resetFilter()
+      // }
     },
-    clickItem(type) {
-      this.clickItemFlag = !this.clickItemFlag;
+    clickItem(flag, val) {
+      if (!flag) {
+        this.clickItemFlag = !this.clickItemFlag;
+      }
+      if (val == 1) {
+        this.filterTit = "注册时间排序";
+      } else if (val == 2) {
+        this.filterTit = "最后登录时间排序";
+      }
+      this.orderByName = val;
       this.showFade = !this.showFade;
       if (!this.showFade) {
         this.isTimer = false;
       }
+      this.queryCustInfoDataFn();
     },
     submitFn() {
       this.showFadeFilter = false;
       this.isFil = false;
-      this.onPullingDown()
+      this.onPullingDown();
     },
-    resetFn() {      
-      this.resetFilter()
+    resetFn() {
+      this.resetFilter();
     },
     resetFilter() {
-      this.noRealName = false
-      this.realName = false
-      this.traded = false
-      this.regType = null
-      this.applyCity = null
-      this.searchCon = ''
+      this.noRealName = false;
+      this.realName = false;
+      this.traded = false;
+      this.regType = null;
+      this.applyCity = null;
+      this.searchCon = "";
+      this.cityId = "";
       // 注册形式
       let ele = document.getElementsByClassName("selectPar")[0];
       let childEleSpan = ele.getElementsByTagName("span");
       for (let i = 0; i < childEleSpan.length; i++) {
-        childEleSpan[i].className = ""
+        childEleSpan[i].className = "";
       }
       // 城市申请
       let eles = document.getElementsByClassName("ul-wrap")[0];
@@ -332,7 +371,7 @@ export default {
       console.log(12121);
     },
     goCustFollow(item) {
-      this.setItemObj(item)
+      this.setItemObj(item);
       this.$router.push({
         path: "/addCustFollowUp",
         query: {
@@ -341,21 +380,24 @@ export default {
       });
     },
     queryCustInfoDataFn() {
-      if (this.showFilterDate) { //帅选条件存在
-        let custStatus
-        let par1 = this.noRealName ? "1" : ''
-        let par2 = this.realName ? "2" : ''
-        let par3 = this.traded ? "3" : ''
-        this.custStatus = (par1 + par2 + par3).split('')
+      if (this.showFilterDate) {
+        //筛选条件存在
+        let custStatus;
+        let par1 = this.noRealName ? "1" : "";
+        let par2 = this.realName ? "2" : "";
+        let par3 = this.traded ? "3" : "";
+        this.custStatus = (par1 + par2 + par3).split("");
       }
-      console.log(this.custStatus,"this.custStatus")
+      console.log(this.custStatus, "this.custStatus");
       let pararms = {
         pageNo: this.pageNo,
         pageSize: this.pageSize,
         custStatus: this.custStatus,
         pushType: this.regType,
         queryParam: this.queryParam,
-        oneSelf: this.$route.query.oneSelf 
+        oneSelf: this.$route.query.oneSelf,
+        orderByName: this.orderByName,
+        cityId: this.cityId
       };
       this.toast.show();
       api.queryCustInfoData(pararms).then(res => {
@@ -375,8 +417,9 @@ export default {
       setTimeout(() => {
         this.pageNo = 1;
         this.data = [];
-        this.queryCustInfoDataFn();
-        this.$refs.scroll.$refs.scroll.scrollTo(0, 10, 500);
+      
+        this.$refs.scroll.$refs.scroll.scrollTo(0, 10);
+          this.queryCustInfoDataFn();
       }, 1000);
     },
     onPullingUp() {
@@ -391,7 +434,8 @@ export default {
   components: {
     CommonSearch,
     CommonResetBtn,
-    Scroll
+    Scroll,
+    NoData
   }
 };
 </script>
@@ -473,7 +517,7 @@ export default {
         }
         .city-wrap {
           position: relative;
-          padding-bottom: 48px;
+          // padding-bottom: 48px;
           .citys {
             width: 100%;
             margin-top: 15px;
@@ -508,7 +552,7 @@ export default {
                 &:nth-last-child(2),
                 &:nth-last-child(3) {
                   margin-bottom: 0;
-                }                
+                }
               }
               .check-select {
                 position: relative;
@@ -537,43 +581,47 @@ export default {
           margin-right: 10px;
         }
         .filter-main {
-          position: absolute;
+          // position: absolute;
+          // width: 100%;
+          // top: 0;
+          // bottom: 46px;
+          // background-color: red;
+          // z-index: 8888;
+          // left: 0;
+          // right: 0;
+          // overflow: auto;
           width: 100%;
           top: 0;
-          bottom: 46px;
-          background-color: red;
-          z-index: 8888;
           left: 0;
           right: 0;
-          /* height: 100%; */
+          max-height: 80%;
           overflow: auto;
-          // padding-bottom: 50px;
           .check-select {
-                position: relative;
-                background-color: #ffeae1;
-                color: #ff450c;
-                &::after {
-                  content: "";
-                  display: inline-block;
-                  position: absolute;
-                  bottom: 0;
-                  right: 0;
-                  width: 22px;
-                  height: 18px;
-                  background: url("../../assets/images/icon_close1@3x.png")
-                    no-repeat;
-                  background-size: 22px 18px;
-                }
-              }
+            position: relative;
+            background-color: #ffeae1;
+            color: #ff450c;
+            &::after {
+              content: "";
+              display: inline-block;
+              position: absolute;
+              bottom: 0;
+              right: 0;
+              width: 22px;
+              height: 18px;
+              background: url("../../assets/images/icon_close1@3x.png")
+                no-repeat;
+              background-size: 22px 18px;
+            }
+          }
         }
 
         .filter-btns {
-          position: absolute;
-          bottom: 46px;
-          left: 0;
-          width: 100%;
-          color: #eee;
-          z-index: 121212;
+          // position: absolute;
+          // bottom: 46px;
+          // left: 0;
+          // width: 100%;
+          // color: #eee;
+          // z-index: 121212;
         }
         .width-left {
           // justify-content: space-between;
@@ -605,6 +653,15 @@ export default {
         flex: 1;
         background: #f5f5f5;
       }
+      .icon-clear {
+        position: absolute;
+        top: 6px;
+        right: 5px;
+        width: 18px;
+        height: 18px;
+        background: url("../../assets/images/bomb_close@3x.png") no-repeat;
+        background-size: 18px 18px;
+      }
       .search-pad {
         width: 100%;
         display: flex;
@@ -618,6 +675,7 @@ export default {
         // background: rgba(255,255,255,0.14);
         background-color: #f5f5f5;
         color: #a8a8a8;
+        position: relative;
         span {
           width: 35px;
           height: 18px;
@@ -645,11 +703,17 @@ export default {
     .item-pad {
       font-size: 17px;
       padding: 12px 10px 0 12px;
-
+      margin-right: 70px;
+      word-break: break-all;
       .item-name {
         color: #333333;
         display: inline-block;
-        margin-right: 3px;
+        // margin-right: 3px;
+
+        span {
+          font-weight: bolder;
+          margin-left: 5px;
+        }
       }
       .item-phone {
         color: #0e7fff;

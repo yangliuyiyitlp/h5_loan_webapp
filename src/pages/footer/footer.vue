@@ -47,7 +47,7 @@ export default {
 .footer-wrap {
     position: fixed;
     bottom: 0;
-    z-index: 8888;
+    z-index: 899;
     height: 49px;
     line-height: 19px;
     width: 100%;

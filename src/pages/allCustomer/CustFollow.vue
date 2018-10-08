@@ -80,22 +80,25 @@ export default {
     goCustFollow() {
       // this.setItemObj({num: 520,num12: 8})
       this.$router.push({
-        path: "/followList"
+        path: "/followList",
+        query: {
+          crmCustInfoId: this.$route.query.crmCustInfoId
+        }
       })
     },
     checkFn() {
       console.log(6666);
       this.$refs.textarea.blur();
       if (!this.followDateDate) {
-        this.showToast("请输入跟进时间");
+        this.showToast("请输入跟进时间",'warn');
         return;
       }
       if (!this.followDateType && !this.followDateTypeCode) {
-        this.showToast("请输入跟进形式");
+        this.showToast("请输入跟进形式",'warn');
         return;
       }
       if (!this.textareaValue) {
-        this.showToast("请输入跟进内容");
+        this.showToast("请输入跟进内容",'warn');
         return;
       }
       this.disabledSubmit = false;
@@ -114,17 +117,17 @@ export default {
         this.disabledSubmit = false;
       }
     },
-    showToast(txt, toastTime) {
-      const toast = this.$createToast({
-        time: toastTime || 1000,
-        txt: txt,
-        type: "warn"
-      });
-      toast.show();
-      setTimeout(() => {
-        toast.hide();
-      }, 1500);
-    },
+    // showToast(txt, toastTime) {
+    //   const toast = this.$createToast({
+    //     time: toastTime || 1000,
+    //     txt: txt,
+    //     type: "warn"
+    //   });
+    //   toast.show();
+    //   setTimeout(() => {
+    //     toast.hide();
+    //   }, 1500);
+    // },
     followDate() {
       this.datePicker.show();
       console.log(this.datePicker);
@@ -144,7 +147,8 @@ export default {
     },
     submit() {
       this.disabledSubmit = true;
-      this.showLoading.show();
+      // this.showLoading.show();
+      
       let pararms = {
         crmCustInfoId: this.$route.query.crmCustInfoId,
         followNode: "1",
@@ -152,20 +156,25 @@ export default {
         followType: this.followDateTypeCode,
         followContent: this.textareaValue
       };
+      this.showToast("加载中",'loading');
       console.log(pararms)
       api.saveFollowInfo(pararms).then(res => {
-        setTimeout(() => {
-          this.showLoading.hide();
-        }, 1500);
+        // setTimeout(() => {
+        //   this.showLoading.hide();
+        // }, 1500);
         // this.disabledSubmit = false;
         this.resetData();
-        if (!res.data.success) {
-          let msg = this.$createToast({
-            time: 1000,
-            txt: res.data.msg,
-            type: "warn"
-            // mask: true
-          });
+        if (res.data.success) {
+          // let msg = this.$createToast({
+          //   time: 1000,
+          //   txt: res.data.msg,
+          //   type: "warn"
+          //   // mask: true
+          // });
+          // debuggerdebugger
+          this.showToast(res.data.msg,'correct');
+        } else {
+          this.showToast(res.data.msg,'warn');
         }
       });
     },
@@ -203,13 +212,16 @@ export default {
           // console.log(this.followDateTypeCode);
         }
       });
-      this.showLoading = this.$createToast({
-        time: 1500,
-        txt: "加载中...",
-        // type: "warn"
-        mask: true
-      });
+      // this.$toast = this.$createToast({
+      //   time: 1500,
+      //   txt: "加载中...",
+      //   // type: "warn"
+      //   mask: true
+      // });
     },
+    // _showToast(){
+
+    // },
     queryPageDictionaryDetailFn() {
       let pararms = {
         pageNo: 1,
@@ -267,7 +279,7 @@ export default {
     margin-left: 12px;
   }
   .com-require {
-    width: 72px;
+    width: 90px;
   }
   .textarea {
     width: 95%;

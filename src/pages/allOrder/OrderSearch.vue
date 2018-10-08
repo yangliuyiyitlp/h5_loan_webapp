@@ -68,7 +68,6 @@
             </li>
           </ul>
         </div> 
-        
         </div>
 </template>
 
@@ -121,7 +120,6 @@ export default {
         pageSize: 10000,
         status: 1
       };
-
       api.queryPageDictionaryDetail(pararms).then(res => {
         if (res.data.success) {
           if (type == "add") {
@@ -220,6 +218,11 @@ export default {
         min: new Date(2010, 12, 30),
         max: new Date(2080, 12, 30),
         value: new Date(),
+        format: {
+            year: 'YYYY',
+            month: 'MM',
+            date: 'DD'
+          },
         zIndex: 9999,
         onSelect: selectHandle
       });
@@ -250,7 +253,7 @@ export default {
         this.showFadeFilter = false;
       }
       if (this.isFil) {
-        this.resetFilter();
+        // this.resetFilter();
         this.showFadeFilter = !this.showFadeFilter;
         this.showFade = false;
       }
@@ -260,8 +263,20 @@ export default {
       this.showFade = !this.showFade;
     },
     submitFn() {
-      this.orderStatus = [];
+      //获取时间
+      if (
+        (this.search.applyTimeBegin && !this.search.applyTimeEnd) ||
+        (!this.search.applyTimeBegin && this.search.applyTimeEnd)
+      ) {
+        this.showToast("请输入申请开始/申请结束时间", "warn");
+        return false;
+      } else if (this.search.applyTimeBegin > this.search.applyTimeEnd) {
+        this.showToast("申请开始时间需小于申请结束时间", "warn");
+        return false;
+      }
+
       // 获取选中的状态
+      this.orderStatus = [];
       let ele = document.getElementsByClassName("selectNode")[0];
       let childEleSpan = ele.getElementsByTagName("span");
       console.log(childEleSpan);
@@ -275,11 +290,13 @@ export default {
       }
       this.search.orderStatus = this.orderStatus.join(",");
       // 获取选中的订单环节
+      this.search.nodeCode = "";
       let selectPar = document.getElementsByClassName("selectPar")[0];
       let selectChildSpan = selectPar.getElementsByTagName("span");
       console.log(selectChildSpan);
       for (let i = 0; i < selectChildSpan.length; i++) {
         if (selectChildSpan[i].className == "check-select") {
+          console.log(222, selectChildSpan[i]);
           this.search.nodeCode = selectChildSpan[i].attributes["data"].value;
         }
       }
@@ -411,10 +428,10 @@ export default {
             position: absolute;
             top: 6px;
             right: 5px;
-            width: 20px;
+            width: 18px;
             height: 18px;
             background: url("../../assets/images/bomb_close@3x.png") no-repeat;
-            background-size: 20px 18px;
+            background-size: 18px 18px;
           }
         }
         .width-con {
@@ -442,8 +459,8 @@ export default {
           left: 0;
           right: 0;
           // background-color: #fff;
-            max-height:80%;
-           overflow: auto;
+          max-height: 80%;
+          overflow: auto;
           .com-flex1 {
             flex-wrap: wrap;
           }

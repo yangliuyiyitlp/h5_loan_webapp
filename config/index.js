@@ -26,7 +26,7 @@ module.exports = {
     },
 
     // Various Dev Server settings
-    host: 'localhost', // can be overwritten by process.env.HOST
+    host: '192.168.21.29', // can be overwritten by process.env.HOST
     port: 2020, // can be overwritten by process.env.PORT, if port is in use, a free one will be determined
     autoOpenBrowser: true,
     errorOverlay: true,
@@ -65,7 +65,7 @@ module.exports = {
     index: path.resolve(__dirname, '../../webapp/static/index.html'),
     assetsRoot: path.resolve(__dirname, '../../webapp/static'),
     assetsSubDirectory: 'static',
-    assetsPublicPath: '/',
+    assetsPublicPath: '',
 
     /**
      * Source Maps

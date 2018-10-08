@@ -144,4 +144,43 @@ export default {
       params: params
     });
   },
+  queryOrderCount(data, params) { //查询订单数
+    return Axios.post("/api/allOrder/queryOrderCount", queryString.stringify(data), {
+      params: params
+    });
+  },
+  queryOverdueOrderCount(data, params) { //查询总控订单数
+    return Axios.post("/api/allOrder/queryOverdueOrderCount", queryString.stringify(data), {
+      params: params
+    });
+  },
+  // 获取所有的省市区
+  queryAllAddress(data, params) { //
+    return Axios.post("/api/address/queryAllAddress", queryString.stringify(data), {
+      params: params
+    });
+  },
+  // 获取客户统计数量
+  queryCustCount(data, params) { //
+    return Axios.post("/api/customer/queryCustCount", queryString.stringify(data), {
+      params: params
+    });
+  },
+  // 获取贷后统计数量
+  queryOverdueOrderCount(data, params) { //
+    return Axios.post("/api/allOrder/queryOverdueOrderCount", queryString.stringify(data), {
+      params: params
+    });
+  },
+  // 热门城市搜索
+  queryHotCity(data, params) { //
+    return Axios.post("/api/allOrder/queryHotCity", queryString.stringify(data), {
+      params: params
+    });
+  },
+  //菜单menu
+  queryMenulist(data, params) {
+    return Axios.get("/auth/menu/list",data, { params: params });
+  },
+  
 }

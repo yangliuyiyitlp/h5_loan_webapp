@@ -1,7 +1,7 @@
 <template>
   <div class="page followUp">
     <div class="FU-top com-fix">
-      <CommonFU :backTitle='backTitle'></CommonFU>
+      <CommonBack :backTitle='backTitle' :showCustFollow = 'showCustFollow' @goCustFollow = 'goCustFollow'></CommonBack>
     </div>
     <div class="FU-main">
       <div class="FU-module">
@@ -49,12 +49,12 @@
         <div class="FU-item" @click='isShowPop(3)' v-show = "form.FUType == '000021-0002'?true:false">
           <div class="FU-lable required">地址类型</div>
           <div class="module-item">
-            <span :class="['item-value',addressType == ''? 'default':'choose']">{{addressType == '' ? '请选择' : addressType}}</span>
+            <span :class="['item-value',form.addressType == ''? 'default':'choose']">{{form.addressType == '' ? '请选择' : form.addressType}}</span>
             <i class="com-icon-link fr"></i>
           </div>
         </div>
-        <div class="bottom-line" v-show = "form.addressType != 4 && form.addressType != '' && form.FUType == '000021-0002'"></div>
-        <div class="FU-item" v-show = "form.addressType != 4 && form.addressType != '' && form.FUType == '000021-0002'">
+        <div class="bottom-line" v-show = "addressType != 4 && addressType != '' && form.FUType == '000021-0002'"></div>
+        <div class="FU-item" v-show = "addressType != 4 && addressType != '' && form.FUType == '000021-0002'">
           <div class='FU-lable'>详细地址</div>
           <div class="module-item com-left">
             <span>{{addressObj.addressProvince}}</span>
@@ -64,16 +64,16 @@
           </div>
         </div>
         <div class="bottom-line" v-show = "form.FUType == '000021-0002'?true:false"></div>
-        <div class="FU-item" @click='isShowPop(4)' v-show = "form.addressType == 4 && form.FUType == '000021-0002'">
+        <div class="FU-item" @click='isShowPop(4)' v-show = "addressType == 4 && form.FUType == '000021-0002'">
           <div class='FU-lable required'>详细地址</div>
-          <div class="addrTool" v-show=" form.detailAddrVal == ''?true:false">-省- -市- -区-</div>
+          <div class="addrTool" v-show=" form.detailAddress == null?true:false">-省- -市- -区-</div>
           <div class="module-item">
-            <span :class="['item-value',form.detailAddress == '' ?'default':'choose']">{{form.detailAddress == '' ? '请选择' : form.detailAddress}}</span>
+            <span :class="['item-value',form.detailAddress == null ?'default':'choose']">{{form.detailAddress == null ? '请选择' : form.detailAddress}}</span>
             <i class="com-icon-link fr"></i>
           </div>
         </div>
-        <div class="bottom-line" v-show = "form.addressType == 4 && form.FUType == '000021-0002'"></div>
-        <div class="FU-item" v-show = "form.addressType == 4 && form.FUType == '000021-0002'">
+        <div class="bottom-line" v-show = "addressType == 4 && form.FUType == '000021-0002'"></div>
+        <div class="FU-item" v-show = "addressType == 4 && form.FUType == '000021-0002'">
           <div class="addrTool">{{form.addressText == ''?'路/乡/镇 门牌号':''}}</div>
           <div :class="['module-item',form.addressText==''?'':'addressText']">
             <input type="text" placeholder="请输入" :class="['FU-input addressText',form.addressText==''?'default':'choose']" v-model="form.addressText">
@@ -128,7 +128,12 @@
         <div class="FU-item" v-show = "form.collectionFB == 1 ? true:false">
           <div class="FU-lable required">还款金额</div>
           <div class="module-item">
-            <input type="text" placeholder="请输入" :class="['FU-input',form.repayMoney == ''?'default':'choose']" v-model="form.repayMoney">
+            <input type="text" 
+              maxlength= '9' 
+              placeholder="请输入"
+              @blur = 'checkMoney' 
+              :class="['FU-input',form.repayMoney == ''?'default':'choose']" 
+              v-model.trim="form.repayMoney">
           </div>
         </div>
       </div>
@@ -142,7 +147,7 @@
         </div>
         <div class="bottom-line"></div>
         <div class="FU-item" @click='isShowPop(11)'>
-          <div class="FU-lable">跟进时间</div>
+          <div class="FU-lable">预约跟进</div>
           <div class="module-item">
             <span :class="['item-value',form.orderFU == '' ? 'default':'choose']">{{form.orderFU == '' ? '请选择' : form.orderFU}}</span>
             <i class="com-icon-link fr"></i>
@@ -159,7 +164,7 @@
         </div>
       </div>
       <div class="FU-btn">
-        <span class="confirm-btn" @click="confirm">确定</span>
+        <button class="confirm-btn" @click="confirm" :disabled = 'disabled'>确定</button>
       </div>
     </div>
     
@@ -167,15 +172,18 @@
 </template>
 
 <script>
-import CommonFU from "@/components/CommonFU";
+// import CommonFU from "@/components/CommonFU";
+import CommonBack from "@/components/CommonBack";
 import api from "@/api/index";
-const asyncSelectedIndex = [0, 0, 0]
+const asyncSelectedIndex = [0, 0, 0];
 export default {
   name: "AddFollowUp",
   data() {
     return {
       backTitle: "新增跟进",
+      showCustFollow: true,
       indicator: true,
+      disabled: false,
       maxlength: 200,
       zTreeData: [],
       columns1: [
@@ -190,7 +198,8 @@ export default {
         }
       ],
       columns2: [], // 跟进对象
-      columns3: [ // 地址类型
+      columns3: [
+        // 地址类型
         {
           text: "现居住地地址",
           value: 1
@@ -207,13 +216,14 @@ export default {
           text: "其他",
           value: 4
         }
-      ], 
-      columns4: [], // 详细地址 数据字典维护三级联动    
-      columns5: [],// 电话状态 数据字典维护
+      ],
+      columns4: [], // 详细地址 数据字典维护三级联动
+      columns5: [], // 电话状态 数据字典维护
       columns6: [], // 地址状态 数据字典维护
       columns7: [], // 工作状态 数据字典维护
       columns8: [], // 债务人状态 数据字典维护
-      columns9: [ // 催收反馈        
+      columns9: [
+        // 催收反馈
         {
           text: "承诺还款",
           value: 1
@@ -230,41 +240,23 @@ export default {
           text: "拒绝还款",
           value: 4
         }
-      ],     
+      ],
       FUType: "", // 跟进形式text
-      // FUTypeVal: null, // 跟进形式val
       FUObj: "", // 跟进对象text
-      // FUObjVal: null, // 跟进对象val
       name: "", // 姓名val
       phone: "", // 联系电话val
       phoneState: "", // 电话状态text
-      // phoneStateVal: null, // 电话状态val
       workState: "", // 工作状态text
-      // workStateVal: null, // 工作状态val
       debtorState: "", // 债务人状态text
-      // debtorStateVal: null, // 债务人状态val
       collectionFB: "", // 催收反馈text
-      // collectionFBVal: null, // 催收反馈val
       orderFU: "", // 跟进时间text
-      // orderFUVal: null, // 预约时间val
       addrState: "", // 地址状态text
-      // addrStateVal: null, // 地址状态val
       addressType: "", // 地址类型text
-      // addrTypeVal: null, // 地址类型val
-      // detailAddress: "请选择", // 详细地址text
-      // detailAddrVal: null, // 详细地址val
-      // addressText: "", // 地址路/乡/镇
-
-      // repayDate: "请选择", // 还款日期text
-      // repayDateVal: null, // 还款日期val
-      // repayMoney: "", // 还款金额
-      // FUSituation: "", // 跟进情况
-
-      // orderRemind: "", // 预约提醒
+      // detailAddress: "", // 详细地址text
       form: {
-        FUType: "",
-        FUObj: "",
-        name: "",
+        FUType: "", //跟进形式
+        FUObj: "", //跟进对象
+        name: "", //姓名
         relationMobile: "",
         phoneState: "",
         workState: "",
@@ -275,19 +267,23 @@ export default {
         repayMoney: "",
         FUSituation: "",
         orderRemind: "",
-        addrState: '',
-        addressType: '',
-        addressText: ''
+        addrState: "",
+        addressType: "",
+        addressText: "",
+        detailAddress: null
       },
       FUMobile: "",
-      provinceIndex: '',
-      cityIndex:'',
-      addressObj: {}
+      addressObj: {},
+      flagMoney: true,
+      dateNext:''
+      // toastLoading: null
     };
   },
   created() {
-    this.querylinkManForFollowFn();
     this._inint();
+    this.dateNext=this.getDateStr(1)
+    console.log(this.dateNext)
+    // console.log(this.$route.query)
   },
   mounted() {
     // 跟进形式下拉
@@ -301,8 +297,18 @@ export default {
           //要是“外访”，清空电话状态
           this.phoneState = "";
           this.form.phoneState = "";
+        } else {
+          //要是“电话”，清空地址状态、地址类型
+          this.addrState = "";
+          this.addressType = "";
+          this.form.addrState = "";
+          this.form.addressType = "";
+          //要是“电话”，清空非必填的详细地址
+          this.addressObj = {};
+          //要是“电话”，清空必填的详细地址
+          this.form.detailAddress = null;
+          this.form.addressText = "";
         }
-        console.log(this.form.FUType, Index, Text, 12);
       },
       onCancel: () => {}
     });
@@ -315,9 +321,9 @@ export default {
         text: "relation"
       },
       onSelect: (Val, Index, Text) => {
-        console.log(Val, Index, Text);
         this.FUObj = Text[0];
-        this.form.FUObj = Val[0];
+        this.form.FUObj = Text[0];
+        console.log(Val, Index, Text, this.form.FUObj, "===");
         if (this.columns2) {
           this.form.name = this.columns2[Index].name;
           this.form.relationMobile = this.columns2[Index].mobile;
@@ -326,6 +332,7 @@ export default {
           this.form.name = "";
           this.form.relationMobile = "";
         }
+        console.log(this.form.relationMobile, this.form.name, Text);
         // this.FUObjVal = Val[0];
         // 判断是否本人 联系人 单位 赋值姓名与注册手机号码
         // if (Text[0]) {
@@ -341,55 +348,46 @@ export default {
       data: [this.columns3],
       onSelect: (Val, Index, Text) => {
         console.log(Val, Index, Text);
-        this.addressType =Text[0] ? Text[0] : ""
-        this.form.addressType = Val[0] ? Val[0] : ""
+        this.addressType = Val[0] ? Val[0] : "";
+        this.form.addressType = Text[0] ? Text[0] : "";
+        console.log(
+          this.addressType,
+          this.form.addressType,
+          "Val, Index, Text"
+        );
         // 清除之前地址信息
-        this.detailAddress = "请选择"; // 详细地址text
-        this.detailAddrVal = null; // 详细地址val
-        this.addressText = ""; // 地址路/乡/镇     
-        this.queryAddressInfoFn(this.form.addressType)   
+        this.detailAddress = ""; // 详细地址text
+        // this.detailAddrVal = null; // 详细地址val
+        // this.addressText = ""; // 地址路/乡/镇
+        console.log(Val[0], this.form.addressType, "Val[0]");
+        if (Val[0] != 4) {
+          this.form.addressText = "";
+          this.form.detailAddress = null;
+          this.queryAddressInfoFn(this.addressType);
+        }
       },
-      onCancel: () => {},
-    }); 
-    // this.picker3 = this.$createCascadePicker({
-    //   title: "地址类型",
-    //   data: this.columns3,
-    //   selectedIndex: asyncSelectedIndex.slice(),
-    //   // alias: {
-    //   //   value: "id",
-    //   //   text: "provinceName"
-    //   // },
-    //   onSelect: (Val, Index, Text) => {
-    //     console.log(Val, Index, Text);
-    //     this.addressType = Text[0];
-    //     this.addrTypeVal = Val[0];
-    //     // 清除之前地址信息
-    //     this.detailAddress = "请选择"; // 详细地址text
-    //     this.detailAddrVal = null; // 详细地址val
-    //     this.addressText = ""; // 地址路/乡/镇
-    //     // 是否回显地址
-    //     if (this.addrTypeVal == 3) {
-    //     } else {
-    //       // 获取地址回显
-    //     }
-    //   },
-    //   onCancel: () => {},
-    //   onChange: this.asyncChangeHandle
-    // }); // 详细地址下拉
+      onCancel: () => {}
+    });
     this.picker4 = this.$createCascadePicker({
       title: "详细地址",
       data: this.columns4,
-      selectedIndex: asyncSelectedIndex.slice(),
+      // selectedIndex: asyncSelectedIndex.slice(),
       // alias: {
       //   value: "id",
       //   text: "provinceName"
       // },
       onSelect: (Val, Index, Text) => {
-        this.detailAddress = Text[0];
-        this.detailAddrVal = Val[0];
+        this.form.detailAddress = Text.join(" ");
+        console.log(Val, Index, Text);
+        console.log(this.form.detailAddress);
+        // this.detailAddress = Text[0];
+        // this.detailAddrVal = Val[0];
       },
-      onCancel: () => {},
-      onChange: this.asyncChangeHandle
+      onCancel: () => {
+        this.form.addressText = "";
+        this.form.detailAddress = null;
+      }
+      // onChange: this.asyncChangeHandle
     });
     // 电话状态下拉
     this.picker5 = this.$createPicker({
@@ -415,10 +413,10 @@ export default {
         text: "name"
       },
       onSelect: (Val, Index, Text) => {
-        console.log(Val, Index, Text)
+        console.log(Val, Index, Text);
         this.addrState = Text[0] ? Text[0] : "";
-        this.form.addrState = Val[0] ? Val[0] : "";
-        console.log(this.form.addrState, 'this.form.addrState', Text);
+        this.form.addrState = Text[0] ? Text[0] : "";
+        console.log(this.form.addrState, "this.form.addrState", Text);
       },
       onCancel: () => {}
     });
@@ -469,8 +467,8 @@ export default {
     // 还款日期 日期选择器
     this.picker10 = this.$createDatePicker({
       title: "还款日期",
-      min: new Date(2000, 0, 0),
-      max: new Date(2020, 9, 20),
+      min: new Date(this.dateNext),
+      max: new Date(2050, 9, 20),
       value: new Date(),
       format: {
         year: "YYYY",
@@ -487,8 +485,8 @@ export default {
     // 预约跟进日期选择器
     this.picker11 = this.$createDatePicker({
       title: "跟进日期",
-      min: new Date(2000, 0, 0),
-      max: new Date(2020, 9, 20),
+      min: new Date(this.dateNext),
+      max: new Date(2050, 9, 20),
       value: new Date(),
       format: {
         year: "YYYY",
@@ -504,6 +502,16 @@ export default {
     });
   },
   methods: {
+    getDateStr(AddDayCount) {  //获取当前日期的后一天
+      var dd = new Date();
+      dd.setDate(dd.getDate() + AddDayCount); //获取AddDayCount天后的日期
+
+      var y = dd.getFullYear();
+      var m = dd.getMonth() + 1; //获取当前月份的日期
+
+      var d = dd.getDate();
+      return y + "-" + m + "-" + d;
+    },
     // 跟进形式
     isShowPop(val) {
       switch (val) {
@@ -538,10 +546,10 @@ export default {
           this.picker9.show();
           break;
         case 10:
-          this.picker10.show();
+          this.picker10.show(); //还款日期
           break;
         case 11:
-          this.picker11.show();
+          this.picker11.show(); // 预约跟进
           break;
         default:
           break;
@@ -549,52 +557,225 @@ export default {
     },
     // 提交确定
     confirm() {
-      console.log("提交成功", this.form);
-    },
-    // 重置
-    reset() {
-      this.FUObj = "请选择";
-      this.FUObjVal = null;
-      this.name = "";
-      this.phone = "";
-      this.addressType = "请选择";
-      this.addrTypeVal = null;
-      this.detailAddress = "请选择";
-      this.detailAddrVal = null;
-      this.addressText = "";
-      this.phoneState = "请选择";
-      this.phoneStateVal = null;
-      this.addrState = "请选择";
-      this.addrStateVal = null;
-      this.workState = "请选择";
-      this.workStateVal = null;
-      this.debtorState = "请选择";
-      this.debtorStateVal = null;
-      this.collectionFB = "请选择";
-      this.collectionFBVal = null;
-      this.repayDate = "请选择";
-      this.repayDateVal = null;
-      this.repayMoney = "";
-      this.FUSituation = "";
-      this.orderFU = "请选择";
-      this.orderFUVal = null;
-      this.orderRemind = "";
-    },
-    queryAddressInfoFn(val) {
-    	api.queryAddressInfoFn({
-    		crmCustInfoId: this.$route.query.crmCustInfoId,
-    		addressType: val
-    	}).then((res) => {
-    		if (res.data.success) {
-          if (res.data.data != null) {
-          	this.addressObj = res.data.data;  
+      // console.log("提交成功", this.form);
+      // 验证"跟进形式"
+      if (!this.form.FUType) {
+        this.showToast("请选择跟进形式", "warn", 1500, this.disabled);
+        return;
+      }
+      // 验证"跟进对象"
+      if (!this.form.FUObj) {
+        this.showToast("请选择跟进对象", "warn", 1500, this.disabled);
+        return;
+      }
+      // 验证"姓名"
+      if (!this.form.name) {
+        this.showToast("请选择姓名", "warn", 1500, this.disabled);
+        return;
+      }
+      //要是“外访”
+      if (this.form.FUType == "000021-0002" && this.form.FUType) {
+        // 验证必填的"地址状态"
+        if (!this.form.addrState) {
+          this.showToast("请选地址状态", "warn", 1500, this.disabled);
+          return;
+        }
+        // 验证必填的"地址类型"
+        if (!this.form.addressType) {
+          this.showToast("请选地址类型", "warn", 1500, this.disabled);
+          return;
+        }
+        // 验证必填的"详细地址"
+        if (this.form.addressType && this.addressType == 4) {
+          if (!this.form.detailAddress || !this.form.addressText) {
+            this.showToast("请输入详细地址", "warn", 1500, this.disabled);
+            return;
           }
         }
-    	})
+      }
+      // 验证催收反馈
+      if (!this.form.collectionFB) {
+        this.showToast("请选催收反馈", "warn", 1500, this.disabled);
+        return;
+      }
+      // 验证还款日期、还款金额
+      if (this.form.collectionFB && this.form.collectionFB == 1) {
+        if (!this.form.repayDate) {
+          this.showToast("请选还款日期", "warn", 1500, this.disabled);
+          return;
+        }
+        if (!this.form.repayMoney) {
+          this.showToast("请输入还款金额", "warn", 1500, this.disabled);
+          return;
+        }
+      }
+      // 验证跟进情况
+      if (!this.form.FUSituation) {
+        this.showToast("请输入跟进情况", "warn", 1500, this.disabled);
+        return;
+      }
+      if (this.flagMoney) {
+        console.log(this.flagMoney, "提交成功", this.form, "提交成功");
+        this.saveFollowInfoFn();
+      } else if (this.form.collectionFB == 1) {
+        this.checkMoney();
+        console.log(121212, "提交成功");
+      }
+    },
+    checkMoney() {
+      let reg = /^([0-9]+)(.[0-9]{1,2})?$/;
+      // console.log(reg.test(this.form.repayMoney),"reg.test(this.form.repayMoney)",this.form.repayMoney)
+      if (reg.test(this.form.repayMoney)) {
+        if (
+          Number(this.form.repayMoney) <= 0 ||
+          isNaN(Number(this.form.repayMoney))
+        ) {
+          this.showToast("只允许输入大于零的数字", "warn", 1500, this.disabled);
+          this.flagMoney = false;
+        } else {
+          this.flagMoney = true;
+        }
+      } else {
+        this.showToast("最多只允许输入2位小数", "warn", 1500, this.disabled);
+        this.flagMoney = false;
+      }
+      // if (!this.flagMoney) {
+      //   this.disabled = true
+      // }
+    },
+    // 验证弹框
+    // showToast(txt, toastTime) {
+    //   this.disabled = true;
+    //   const toast = this.$createToast({
+    //     time: toastTime || 1000,
+    //     txt: txt || "请输入内容",
+    //     type: "warn"
+    //   });
+    //   toast.show();
+    //   setTimeout(() => {
+    //     toast.hide();
+
+    //     this.disabled = false;
+    //   }, 1500);
+    // },
+    // 重置
+    reset() {
+      this.FUType = ""; // 跟进形式text
+      this.FUObj = ""; // 跟进对象text
+      this.name = ""; // 姓名val
+      this.phone = ""; // 联系电话val
+      this.phoneState = ""; // 电话状态text
+      this.workState = ""; // 工作状态text
+      this.debtorState = ""; // 债务人状态text
+      this.collectionFB = ""; // 催收反馈text
+      this.orderFU = ""; // 跟进时间text
+      this.addrState = ""; // 地址状态text
+      this.addressType = ""; // 地址类型text
+      // detailAddress: "", // 详细地址text
+      this.form = {
+        FUType: "", //跟进形式
+        FUObj: "", //跟进对象
+        name: "", //姓名
+        relationMobile: "",
+        phoneState: "",
+        workState: "",
+        debtorState: "",
+        collectionFB: "",
+        orderFU: "",
+        repayDate: "",
+        repayMoney: "",
+        FUSituation: "",
+        orderRemind: "",
+        addrState: "",
+        addressType: "",
+        addressText: "",
+        detailAddress: null
+      };
+      this.FUMobile = "";
+      this.addressObj = {};
+    },
+    saveFollowInfoFn() {
+      this.disabled = true;
+      let pararms = {
+        crmCustInfoId: this.$route.query.crmCustInfoId,
+        followNode: "3", //跟进环节:1.贷前 2.监测 3.贷后 4.ERP跟进 必填
+        receivingRelation: this.form.FUObj, //跟进对象
+        receivingName: this.form.name, //姓名
+        receivingMobile: this.form.relationMobile, // 联系电话
+        contactMobileStatus: this.form.phoneState, //电话状态
+        contactJobStatus: this.form.workStateVal, //工作状态
+        contactObligorStatus: this.form.debtorState, //债务人状态
+        collectionFeedback: this.form.collectionFB, //催收反馈
+        repaymentDate: this.form.repayDate, //还款日期
+        repaymentAmount: this.form.repayMoney, //还款金额
+        followContent: this.form.FUSituation, //跟进情况
+        reminderTime: this.form.orderFU, //跟进时间
+        reminderContent: this.form.orderRemind, //预约提醒 贷后
+        followType: this.form.FUType, //跟进形式
+        addressStatus: this.form.addrState, //地址状态
+        addressType: this.form.addressType //地址类型
+      };
+      if (this.addressType == 4) {
+        pararms.addressProvince = this.form.detailAddress.split(" ")[0] || "";
+        pararms.addressCity = this.form.detailAddress.split(" ")[1] || "";
+        pararms.addressArea = this.form.detailAddress.split(" ")[2] || "";
+        pararms.detailedAddress = this.form.addressText;
+      }
+      if (this.addressType != 4) {
+        pararms.addressProvince = this.addressObj.addressProvince;
+        pararms.addressCity = this.addressObj.addressCity;
+        pararms.addressArea = this.addressObj.addressArea;
+        pararms.detailedAddress = this.addressObj.detailedAddress;
+      }
+      //  addressProvince: this.form.homeProvinceId.provinceName,
+      //   addressCity: this.form.homeCityId.cityName,
+      //   addressArea: this.form.homeDistrictId.districtName,
+      //   detailedAddress: this.form.homeAddress
+      // this.toastLoading.show()
+      this.showToast("加载中...", "loading");
+      api.saveFollowInfo(pararms).then(res => {
+        this.disabled = false;
+        console.log(res, "==============");
+        // this.toastLoading.hide()
+        this.toast.hide();
+        if (res.data.success) {
+          this.reset();
+          this.showToast(res.data.msg, "correct");
+        } else {
+          this.showToast(res.data.msg, "error");
+        }
+      });
+    },
+    // toastSubmit(type, val) {
+    //   const toast = this.$createToast({
+    //     txt: val,
+    //     type: type,
+    //     time: 0,
+    //     onTimeout: () => {
+    //       console.log("Timeout");
+    //     }
+    //   });
+    //   toast.show();
+    //   setTimeout(() => {
+    //     toast.hide();
+    //   }, 1000);
+    // },
+    queryAddressInfoFn(val) {
+      let pararms = {
+        crmCustInfoId: this.$route.query.crmCustInfoId,
+        addressType: val
+      };
+      api.queryAddressInfoFn(pararms).then(res => {
+        if (res.data.success) {
+          if (res.data.data != null) {
+            this.addressObj = res.data.data;
+          }
+        }
+      });
     },
     querylinkManForFollowFn() {
       let pararms = {
-        crmApplayId: "09950eda68b64e088c4f2bc30467a3b1"
+        crmApplayId: this.$route.query.crmApplyId
       };
       this.columns2 = [];
       api.querylinkManForFollow(pararms).then(res => {
@@ -606,13 +787,28 @@ export default {
         console.log(this.columns2);
       });
     },
+    goCustFollow() {
+      this.$router.push({
+        path: "/followList",
+        query: {
+          crmCustInfoId: this.$route.query.crmCustInfoId
+        }
+      });
+    },
     _inint() {
+      this.querylinkManForFollowFn();
       this.queryPageDictionaryDetailFn("000013");
       this.queryPageDictionaryDetailFn("000014");
       this.queryPageDictionaryDetailFn("000015");
       this.queryPageDictionaryDetailFn("000025");
-      this.queryProvinceFn();
-      this.queryProvinceFn();
+      // this.queryProvinceFn();
+      // this.queryProvinceFn();
+      // this.toastLoading = this.$createToast({
+      //   time: 1500,
+      //   txt: "加载中...",
+      //   mask: true
+      // });
+      this.queryAllAddressFn();
     },
     queryPageDictionaryDetailFn(code) {
       let pararms = {
@@ -651,70 +847,30 @@ export default {
       this["columns" + index] = this["columns" + index];
       // console.log(this["columns" + index], "columns" + index);
     },
-    queryProvinceFn() {//省份
-      api.queryProvince().then(res => {
-        if (res.data.success) {
-          let data = res.data.data;
-          for (let i in data) {
-            let obj = {}
-            obj.value = data[i].id
-            obj.text = data[i].provinceName
-            this.columns4.push(obj)
-          }
-          console.log(this.columns4, "this.columns3----------");
-        }
-      });
-    },
-    queryCityByProvinceIdFn(id) {
-      let pararms = {
-        provinceId: id
-      }
-      api.queryCityByProvinceId(pararms).then(res => {
-        if (res.data.success) {
-          let data = res.data.data;
-          this.columns4[this.provinceIndex].children = []
-          for (let i in data) {
-            let obj = {}
-            obj.value = data[i].id
-            obj.text = data[i].cityName
-            this.columns4[this.provinceIndex].children.push(obj);
-          }
-          console.log(this.columns4, "this.columns4----------");
-        }
-      });
-    },
-    asyncChangeHandle(i, newIndex) {
-      console.log(i, newIndex,'===')
-      if (newIndex !== asyncSelectedIndex[i]) {
-        asyncSelectedIndex[i] = newIndex
-        this.provinceIndex = newIndex
-        this.queryCityByProvinceIdFn(this.columns4[newIndex].value)
-        // console.log()
-        // If the first two column is changed, request the data for rest columns.
-        if (i < 2) {
-          // Mock async load.
-          setTimeout(() => {
-            if (i === 0) {
-              // const current = this.columns3[newIndex]
-              // current.children = current.children || cityList[current.value]
-              // current.children[0].children = current.children[0].children || areaList[current.children[0].value]
-              asyncSelectedIndex[1] = 0
-              asyncSelectedIndex[2] = 0
-            }
 
-            if (i === 1) {
-              // const current = asyncData[asyncSelectedIndex[0]].children[newIndex]
-              // current.children = current.children || areaList[current.value]
-              asyncSelectedIndex[2] = 0
+    queryAllAddressFn() {
+      api.queryAllAddress().then(res => {
+        if (res.data.success) {
+          let data = res.data.data;
+          for (let i in data) {
+            let obj = {};
+            obj.value = data[i].value;
+            obj.text = data[i].text;
+            if (data[i].children) {
+              obj.children = data[i].children;
             }
-            this.picker4.setData(this.columns4, asyncSelectedIndex)
-          }, 500)
+            this.columns4.push(obj);
+          }
         }
-      }
-    },
+        // this.columns4 = res.data.data
+        // console.log(this.columns4,"dddddddddddd")
+        // console.log(res.data.data,"dddddddddddd")
+      });
+    }
   },
   components: {
-    CommonFU
+    // CommonFU,
+    CommonBack
   }
 };
 </script>
@@ -803,6 +959,8 @@ export default {
     // margin: auto;
     border-radius: 0.22rem;
     margin: 22px auto;
+    outline: none;
+    border: none;
   }
 }
 .addrTool {
@@ -810,12 +968,14 @@ export default {
 }
 .addressText {
   width: 100% !important;
+  box-sizing: border-box;
 }
 .FU-textarea {
-  width: 230px;
+  width: 100%;
   font-size: 16px;
   min-height: 65px;
-  padding-right: 9px;
+  padding-right: 20px;
+  box-sizing: border-box;
 }
 .cube-textarea {
   padding-top: 0;

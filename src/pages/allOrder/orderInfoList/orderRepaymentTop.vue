@@ -17,12 +17,12 @@
       </div>
       <div class='repayList'>
           <ul>
-              <li><span>客户电话</span><span class='js-blue'>11111111111</span></li>
-              <li><span>当前应还本金</span><span>{{orderRepayTop.totalPrincipal}}</span></li>
-              <li><span>当前应还利息</span><span>{{orderRepayTop.totalInterest}}</span></li>
-              <li><span>当前应还罚息</span><span>{{orderRepayTop.totalAccrual}}</span></li>
-              <li><span>提前结清金额</span><span>{{orderRepayTop.amount}}</span></li>
-              <li><span>当前应还分期服务费</span><span>{{orderRepayTop.totalManagerFee}}</span></li>
+              <li><span>客户电话</span><span class='js-blue'>{{orderRepayTop.custMobile}}</span></li>
+              <li><span>当前应还本金</span><span>{{orderRepayTop.totalPrincipal}}元</span></li>
+              <li><span>当前应还利息</span><span>{{orderRepayTop.totalInterest}}元</span></li>
+              <li><span>当前应还罚息</span><span>{{orderRepayTop.totalAccrual}}元</span></li>
+              <li><span>提前结清总金额</span><span>{{orderRepayTop.amount}}元</span></li>
+              <li><span>当前应还分期服务费</span><span>{{orderRepayTop.totalManagerFee}}元</span></li>
               </ul>
       </div>
    </div>
@@ -90,7 +90,7 @@ export default {
        background-size: 100% 229px;
     div:nth-child(1) {
       width: 100%;
-      padding: 15px 11px;
+      padding: 12px 11px;
       i {
         width: 38px;
         height: 38px;

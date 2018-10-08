@@ -26,10 +26,10 @@ export default {
       allLoanTab: {
         overDueTab: false, //m1 逾期
         title:'放款天数',
-         tip:'输入的放款天数起点的天数不能大于终点的天数'
+         tip:'放款天数起点天数不能大于终点天数'
       },
       tableList: [],
-      toast: null,
+      // toast: null,
       pageSize: 10,
       pageNo: 1,
       search: {
@@ -41,13 +41,13 @@ export default {
       }
     };
   },
-  created() {
-    this.toast = this.$createToast({
-      time: 1000,
-      txt: "加载中...",
-      mask: true
-    });
-  },
+  // created() {
+  //   this.toast = this.$createToast({
+  //     time: 1000,
+  //     txt: "加载中...",
+  //     mask: true
+  //   });
+  // },
   mounted() {
     this.queryMiniList();
   },
@@ -75,11 +75,12 @@ export default {
         pageSize: this.pageSize,
         pageNo: this.pageNo,
         queryParam: this.searchPararms.queryParam,
-        loanTimeBegin: this.search.dayBegin, //放款时间开始
-        loanTimeEnd: this.search.dayEnd //放款时间结束
-        // currentModuleId: this.$route.query.menuId
+        loanDayBegin: this.search.dayBegin, //放款天数开始
+        loanDayEnd: this.search.dayEnd, //放款天数结束
+        currentModuleId: this.$route.query.menuId
       };
-      this.toast.show();
+      // this.toast.show();
+      this.showToast("加载中",'loading');
       api.queryMiniList(pararms).then(res => {
         this.toast.hide();
         if (res.data.success) {
@@ -87,6 +88,9 @@ export default {
         } else {
           this.tableList = [];
         }
+      }).catch(err=>{
+            this.showToast('请求失败','warn');
+          this.toast.hide();
       });
     },
     onPullingUp(pageNo) {

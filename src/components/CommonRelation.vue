@@ -20,9 +20,10 @@
               <span>姓名</span>
               <p>{{item.name}}</p>
             </li>
-            <li v-if = 'item.relation == "配偶"'>
+            <!-- <li v-if = '(item.linkmanIc != null) && (item.linkmanIc != "")'> -->
+            <li v-if = '(item.relationTop == "一") && (item.relation == "配偶")'>
               <span>身份证号码</span>
-              <p>配偶电话加个字段</p>
+              <p>{{item.linkmanIc}}</p>
             </li>
             <li>
               <span>电话</span>
@@ -38,65 +39,14 @@
             </li>       
           </ul>        
         </div>
-      </div>
-      
-      <!-- <div class="com-bgcolor-fff">
-        <div class="com-pad-lr12">
-            <div class="com-pad-item">
-              <i class="com-left-border"></i>第二联系人     
-            </div>
-        </div>
-        <div class="border-bot-1px"></div>
-        <ul class="ul-wrap">
-          <li>
-            <span>关系</span>
-            <p>同事</p>
-          </li>
-          <li>
-            <span>姓名</span>
-            <p>大美美</p>
-          </li>
-          <li>
-            <span>电话</span>
-            <p>1222222222</p>
-          </li>           
-          <li>
-            <span>是否允许知晓该比借款</span>
-            <p>是</p>
-          </li>       
-        </ul>        
-      </div>   -->
-      <!-- <div class="com-bgcolor-fff">
-        <div class="com-pad-lr12">
-            <div class="com-pad-item">
-              <i class="com-left-border"></i>第三联系人     
-            </div>
-        </div>
-        <div class="border-bot-1px"></div>
-        <ul class="ul-wrap">
-          <li>
-            <span>关系</span>
-            <p>同事</p>
-          </li>
-          <li>
-            <span>姓名</span>
-            <p>大美美</p>
-          </li>
-          <li>
-            <span>电话</span>
-            <p>1222222222</p>
-          </li>           
-          <li>
-            <span>是否允许知晓该比借款</span>
-            <p>是</p>
-          </li>       
-        </ul>        
-      </div>             -->
+      </div>      
+      <NoData v-if = "linkInfo.length == 0"></NoData>
   </div>
 </template> 
 
 <script>
 import CommonBack from "@/components/CommonBack";
+import NoData from "@/components/NoData"
 import { mapActions } from "vuex";
 import api from "@/api/index";
 export default {
@@ -105,7 +55,8 @@ export default {
   data() {
     return {
       backTitle: "联系人信息",
-      linkInfo: []
+      linkInfo: [],
+      custItem: {}
     };
   },
   created() {
@@ -118,11 +69,25 @@ export default {
   },
   methods: {
     queryLinkManInfoFn() {
-      let params = {
-        crmCustInfo: this.custItem.crmCustInfoId
-      };
+      // let params = {
+      //   // crmCustInfo: this.custItem.crmCustInfoId
+      // };
+      let pararms = {};
+      if (this.custItem.hasOwnProperty("orderType") && this.custItem.orderType == "orderType") {
+        //订单的联系人信息
+        // pararms.crmApplayId = this.custItem.applyId; 
+        pararms.crmApplayId = this.custItem.applyId;
+      }     
+      if (this.custItem.hasOwnProperty("custType") && this.custItem.custType == "custType") {
+        //客户的联系人信息
+        pararms.crmCustInfo = this.custItem.crmCustInfoId;
+      }
+      if (this.custItem.hasOwnProperty("loanType") && this.custItem.loanType == "loanType") {
+        //贷后的联系人信息
+        pararms.crmApplayId = this.custItem.crmApplyId;
+      }
       this.linkInfo = []
-      api.queryLinkManInfo(params).then(res => {
+      api.queryLinkManInfo(pararms).then(res => {
         if (res.data.code == 1) {
           this.linkInfo = res.data.data;
         }
@@ -133,7 +98,8 @@ export default {
     })
   },
   components: {
-    CommonBack
+    CommonBack,
+    NoData
   }
 };
 </script>
@@ -143,11 +109,14 @@ export default {
 .relation-wrap {
   font-size: 16px;
   color: #4d4d4d;
-  .com-bgcolor-fff:last-child {
-    margin-top: 9px;
-  }
+  // .com-bgcolor-fff:last-child {
+  //   margin-top: 9px;
+  // }
   .relation-top {
     margin: 59px 0 9px;
+    .com-bgcolor-fff {
+      margin-top: 9px;
+    }
   }
   .com-pad-lr12 {
     .com-left-border {

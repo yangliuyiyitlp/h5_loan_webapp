@@ -17,29 +17,29 @@ export default {
   data() {
     return {
       backTitle: "M1订单",
-       allLoanTab: {
-         tip:'输入的逾期天数起点的天数不能大于终点的天数'
-      },
+      //  allLoanTab: {
+      //    tip:'逾期天数起点天数不能大于终点天数'
+      // },
       tableList: [],
-      toast: null,
+      // toast: null,
       pageSize: 10,
       pageNo: 1,
-      search: {
-       dayBegin: "",
-        dayEnd: "",
-      },
+      // search: {
+      //  dayBegin: "",
+      //   dayEnd: "",
+      // },
       searchPararms: {
         queryParam: ""
       }
     };
   },
-  created() {
-    this.toast = this.$createToast({
-      time: 1000,
-      txt: "加载中...",
-      mask: true
-    });
-  },
+  // created() {
+  //   this.toast = this.$createToast({
+  //     time: 1000,
+  //     txt: "加载中...",
+  //     mask: true
+  //   });
+  // },
   mounted() {
     this.queryOverdueOrders();
   },
@@ -52,14 +52,14 @@ export default {
       this.queryOverdueOrders();
        this.$refs.loanTab.toTop()
     },
-    searchAllLoan(val) {
-      //高级搜索条件
-       this.pageNo = 1
-      this.search = Object.assign(this.search, val);
-      this.tableList = [];
-      this.queryOverdueOrders();
-       this.$refs.loanTab.toTop()
-    },
+    // searchAllLoan(val) {
+    //   //高级搜索条件
+    //    this.pageNo = 1
+    //   this.search = Object.assign(this.search, val);
+    //   this.tableList = [];
+    //   this.queryOverdueOrders();
+    //    this.$refs.loanTab.toTop()
+    // },
     queryOverdueOrders() {
       const pararms = {
         // 加上搜索条件
@@ -67,13 +67,14 @@ export default {
         pageSize: this.pageSize,
         pageNo: this.pageNo,
         queryParam: this.searchPararms.queryParam,
-        overdueDayBegin: this.search.dayBegin, //逾期天数开始
-        overdueDayEnd: this.search.dayEnd, //逾期天数结束
+        // overdueDayBegin: this.search.dayBegin, //逾期天数开始
+        // overdueDayEnd: this.search.dayEnd, //逾期天数结束
         overdueStatusBegin: "1", //逾期状态开始
-        overdueStatusEnd: "1" //逾期状态结束
-        // currentModuleId: this.$route.query.menuId
+        overdueStatusEnd: "1", //逾期状态结束
+        currentModuleId: this.$route.query.menuId
       };
-      this.toast.show();
+      // this.toast.show();
+      this.showToast("加载中",'loading');
       api.queryOverdueOrders(pararms).then(res => {
         this.toast.hide();
         if (res.data.success) {
@@ -81,6 +82,9 @@ export default {
         } else {
           this.tableList = [];
         }
+      }).catch(err=>{
+            this.showToast('请求失败','warn');
+          this.toast.hide();
       });
     },
     onPullingUp(pageNo) {

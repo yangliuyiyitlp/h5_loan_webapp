@@ -133,6 +133,9 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style  lang="less" scoped>
 .cust-wrap {
+  //  .item-title{
+  //       margin-right: 79px;
+  // }
   .filter-data {
     & > ul {
       width: 100%;

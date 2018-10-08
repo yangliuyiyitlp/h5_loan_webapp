@@ -7,7 +7,7 @@
 
 <script>
 import api from '@/api/index.js'
-import Footer from '@/pages/footer/footer'
+import Footer from '@/pages/footer/Footer'
 
 export default {
   name: 'lyout',  

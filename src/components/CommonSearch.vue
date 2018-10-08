@@ -8,7 +8,7 @@
         <span>
           <i class="icon-search" @click="search"></i>
         </span>
-        <input type="text" :placeholder="placeholder" v-model="searchCon">
+        <input type="text" :placeholder="placeholder" v-model.trim="searchCon">
        <span class="com-right">
           <i class="icon-search icon-search-close" @click="clearFn"></i>
         </span>
