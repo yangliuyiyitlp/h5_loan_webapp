@@ -60,8 +60,9 @@ export default {
     };
   },
   created() {
-    this.getItemObj();
-    this.custItem = this.$store.state.custItem;
+    // this.getItemObj();
+    // this.custItem = this.$store.state.custItem;
+    this.custItem = this.$route.query
     // console.log(this.$store.state.custItem);
   },
   mounted() {
@@ -73,18 +74,18 @@ export default {
       //   // crmCustInfo: this.custItem.crmCustInfoId
       // };
       let pararms = {};
-      if (this.custItem.hasOwnProperty("orderType") && this.custItem.orderType == "orderType") {
+      if (this.custItem.hasOwnProperty("types") && this.custItem.types == "orderType") {
         //订单的联系人信息
         // pararms.crmApplayId = this.custItem.applyId; 
-        pararms.crmApplayId = this.custItem.applyId;
+        pararms.crmApplayId = this.custItem.crmApplayId;
       }     
-      if (this.custItem.hasOwnProperty("custType") && this.custItem.custType == "custType") {
+      if (this.custItem.hasOwnProperty("types") && this.custItem.types == "custType") {
         //客户的联系人信息
         pararms.crmCustInfo = this.custItem.crmCustInfoId;
       }
-      if (this.custItem.hasOwnProperty("loanType") && this.custItem.loanType == "loanType") {
+      if (this.custItem.hasOwnProperty("types") && this.custItem.types == "loanType") {
         //贷后的联系人信息
-        pararms.crmApplayId = this.custItem.crmApplyId;
+        pararms.crmApplayId = this.custItem.crmApplayId;
       }
       this.linkInfo = []
       api.queryLinkManInfo(pararms).then(res => {

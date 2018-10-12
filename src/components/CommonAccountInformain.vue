@@ -70,9 +70,10 @@ export default {
     };
   },
   created() {
-    this.getItemObj();
-    this.custItem = this.$store.state.custItem;
-    // console.log(this.$store.state.custItem);
+    // this.getItemObj();
+    // this.custItem = this.$store.state.custItem;
+    this.custItem = this.$route.query
+    console.log(this.custItem.hasOwnProperty("types") && this.custItem.types == "orderType");
   },
   mounted() {
     this.queryAccountInfo()
@@ -86,18 +87,18 @@ export default {
     },   
     queryAccountInfo(){
       let pararms = {}
-      if (this.custItem.hasOwnProperty("orderType") && this.custItem.orderType == "orderType") {
+      if (this.custItem.hasOwnProperty("types") && this.custItem.types == "orderType") {
         //订单的账户信息
-        pararms.crmApplayId = this.custItem.applyId;
+        pararms.crmApplayId = this.custItem.crmApplayId;
       }
-      if (this.custItem.hasOwnProperty("custType") && this.custItem.custType == "custType") {
+      if (this.custItem.hasOwnProperty("types") && this.custItem.types == "custType") {
         //客户的账户信息
         pararms.crmCustInfo = this.custItem.crmCustInfoId;
         console.log(8888);
       }
-       if (this.custItem.hasOwnProperty("loanType") && this.custItem.loanType == "loanType") {
+       if (this.custItem.hasOwnProperty("types") && this.custItem.types == "loanType") {
         //贷后的账户信息
-        pararms.crmApplayId = this.custItem.crmApplyId;
+        pararms.crmApplayId = this.custItem.crmApplayId;
       }
       this.accoutInfo = {}
   		api.queryAccountInfo(pararms).then((res) =>{
@@ -113,16 +114,16 @@ export default {
     },
     queryAccountBalanceFn(){//账户余额
       let pararms = {}
-       if (this.custItem.hasOwnProperty("orderType") && this.custItem.orderType == "orderType") {
+       if (this.custItem.hasOwnProperty("types") && this.custItem.types == "orderType") {
         //订单的账户信息
-        pararms.crmApplayId = this.custItem.applyId;
+        pararms.crmApplayId = this.custItem.crmApplayId;
       }
-      if (this.custItem.hasOwnProperty("custType") && this.custItem.custType == "custType") {
+      if (this.custItem.hasOwnProperty("types") && this.custItem.types == "custType") {
         //客户的账户信息
         pararms.crmCustInfo = this.custItem.crmCustInfoId;
         console.log(8888);
       }
-       if (this.custItem.hasOwnProperty("loanType") && this.custItem.loanType == "loanType") {
+       if (this.custItem.hasOwnProperty("types") && this.custItem.types == "loanType") {
         //贷后的账户信息
         pararms.crmApplayId = this.custItem.crmApplyId;
       }
@@ -133,9 +134,9 @@ export default {
 				}
 			})
 		},
-    ...mapActions({
-      getItemObj: "GET_ITEM_OBJ"
-    })
+    // ...mapActions({
+    //   getItemObj: "GET_ITEM_OBJ"
+    // })
   },
   components: {
     CommonBack

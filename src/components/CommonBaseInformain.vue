@@ -11,42 +11,42 @@
         </div>
         <div class="border-bot-1px"></div>
         <ul class="ul-wrap">
-          <li v-if = 'custItem.hasOwnProperty("custType") && custItem.custType == "custType"'>
+          <li v-if = 'custItem.hasOwnProperty("types") && custItem.types == "custType"'>
             <span>注册手机号</span>
             <p class="com-color-blue">{{userInfo.custMobile}}</p>
           </li>
-          <li v-if = 'custItem.hasOwnProperty("custType") && custItem.custType == "custType"'>
+          <li v-if = 'custItem.hasOwnProperty("types") && custItem.types == "custType"'>
             <span>姓名</span>
             <p>{{userInfo.custName}}</p>
           </li>
-          <li v-if = 'custItem.hasOwnProperty("custType") && custItem.custType == "custType"'>
+          <li v-if = 'custItem.hasOwnProperty("types") && custItem.types == "custType"'>
             <span>身份证号码</span>
             <p>{{userBaseInfo.icNumber}}</p>
           </li>
-          <li v-if = 'custItem.hasOwnProperty("custType") && custItem.custType == "custType"'>
+          <li v-if = 'custItem.hasOwnProperty("types") && custItem.types == "custType"'>
             <span>申请城市</span>
             <p>{{userInfo.procName}} {{userInfo.cityName}}</p>
           </li>
-          <li v-if = 'custItem.hasOwnProperty("custType") && custItem.custType == "custType"'>
+          <li v-if = 'custItem.hasOwnProperty("types") && custItem.types == "custType"'>
             <span>注册时间</span>
             <p>{{userInfo.regTime}}</p>
           </li>
-          <li v-if = 'custItem.hasOwnProperty("orderType") && custItem.orderType == "orderType"'>
+          <li v-if = 'custItem.hasOwnProperty("types") && custItem.types == "orderType"'>
             <!-- 订单 -->
             <span>姓名</span>
             <p>{{orderBaseInfo.custName}}</p>
           </li>
-          <li v-if = 'custItem.hasOwnProperty("orderType") && custItem.orderType == "orderType"'>
+          <li v-if = 'custItem.hasOwnProperty("types") && custItem.types == "orderType"'>
             <!-- 订单 -->
             <span>身份证号码</span>
             <p>{{orderBaseInfo.custIc}}</p>
           </li>
-           <li v-if = 'custItem.hasOwnProperty("orderType") && custItem.orderType == "orderType"'>
+           <li v-if = 'custItem.hasOwnProperty("types") && custItem.types == "orderType"'>
             <!-- 订单 -->
             <span>申请城市：</span>
             <p>{{orderBaseInfo.provId}} {{orderBaseInfo.cityId}}</p>
           </li>
-          <li v-if = 'custItem.hasOwnProperty("orderType") && custItem.orderType == "orderType"'>
+          <li v-if = 'custItem.hasOwnProperty("types") && custItem.types == "orderType"'>
             <!-- 订单 -->
             <span>申请时间：</span>
             <p>{{orderBaseInfo.createTime}}</p>
@@ -55,22 +55,22 @@
            <!-- <span v-if="orderBaseInfo.custIc !=='-'">身份证号：{{orderBaseInfo.custIc}}</span>
           申请时间：<span>{{orderBaseInfo.createTime}}</span>
           申请城市：<span>{{orderBaseInfo.provId}} {{orderBaseInfo.cityId}}</span> -->
-          <li v-if = 'custItem.hasOwnProperty("loanType") && custItem.loanType == "loanType"'>
+          <li v-if = 'custItem.hasOwnProperty("types") && custItem.types == "loanType"'>
             <!-- 贷后 -->
             <span>姓名</span>
             <p>{{orderBaseInfo.custName}}</p>
           </li>
-          <li v-if = 'custItem.hasOwnProperty("loanType") && custItem.loanType == "loanType"'>
+          <li v-if = 'custItem.hasOwnProperty("types") && custItem.types == "loanType"'>
             <!-- 贷后 -->
             <span>身份证号码</span>
             <p>{{orderBaseInfo.custIc}}</p>
           </li>
-          <li v-if = 'custItem.hasOwnProperty("loanType") && custItem.loanType == "loanType"'>
+          <li v-if = 'custItem.hasOwnProperty("types") && custItem.types == "loanType"'>
             <!-- 贷后 -->
             <span>申请时间：</span>
             <p>{{orderBaseInfo.createTime}}</p>
           </li>
-          <li v-if = 'custItem.hasOwnProperty("loanType") && custItem.orderType == "loanType"'>
+          <li v-if = 'custItem.hasOwnProperty("types") && custItem.types == "loanType"'>
             <!-- 贷后 -->
             <span>申请城市：</span>
             <p>{{orderBaseInfo.provId}} {{orderBaseInfo.cityId}}</p>
@@ -254,13 +254,14 @@ export default {
     };
   },
   created() {
-    this.getItemObj();
-    this.custItem = this.$store.state.custItem;
-    console.log(this.$store.state.custItem,1111111);
+    // this.getItemObj();
+    // this.custItem = this.$store.state.custItem;
+    this.custItem = this.$route.query
+    console.log(this.custItem.hasOwnProperty("custType"),this.custItem,1111111);
   },
   mounted() {
     this.queryEssentialInfoFn();
-    if (this.custItem.hasOwnProperty("custType")) {
+    if (this.custItem.hasOwnProperty("types") && this.custItem.types == "custType") {
       //客户详细信息      
       this.getCustDetailBase();
     } else {
@@ -271,19 +272,19 @@ export default {
     queryEssentialInfoFn() {
       //基本信息
       let pararms = {};
-       if (this.custItem.hasOwnProperty("custType") && this.custItem.custType == "custType") {
+       if (this.custItem.hasOwnProperty("types") && this.custItem.types == "custType") {
         //客户的基本信息
         pararms.crmCustInfo = this.custItem.crmCustInfoId;
       }
-      if (this.custItem.hasOwnProperty("orderType") && this.custItem.orderType == "orderType") {
+      if (this.custItem.hasOwnProperty("types") && this.custItem.types == "orderType") {
         //订单的基本信息
         // pararms.crmApplayId = this.custItem.applyId; 
-        pararms.crmApplayId = this.custItem.applyId;
+        pararms.crmApplayId = this.custItem.crmApplayId;
       }     
      
-      if (this.custItem.hasOwnProperty("loanType") && this.custItem.loanType == "loanType") {
+      if (this.custItem.hasOwnProperty("types") && this.custItem.types == "loanType") {
         //贷后的基本信息
-        pararms.crmApplayId = this.custItem.crmApplyId;
+        pararms.crmApplayId = this.custItem.crmApplayId;
       }
       //  else {
       //   //订单,贷后的基本信息       

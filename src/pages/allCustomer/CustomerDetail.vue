@@ -5,9 +5,9 @@
     </div>
     <div class="pad12">
       <ul>
-        <li><router-link to="/baseInformain">基本信息<i class="com-icon-link fr"></i></router-link></li>
-        <li><router-link to="/relationInformain">联系人信息<i class="com-icon-link fr"></i></router-link></li>
-        <li><router-link to="/accountInformain">账户信息<i class="com-icon-link fr"></i></router-link></li>
+        <li @click="goInformain">基本信息<i class="com-icon-link fr"></i></li>
+        <li @click="goRelation">联系人信息<i class="com-icon-link fr"></i></li>
+        <li @click="goAccount">账户信息<i class="com-icon-link fr"></i></li>
         <li v-if = 'showOreder'>
           <router-link :to="{ path:'/AllOrderList', query: {fromCustDet:'fromCustDet',crmCustInfoId: custItem.crmCustInfoId} }">
           订单信息<i class="com-icon-link fr"></i>
@@ -37,11 +37,29 @@ export default {
   created() {
     this.getItemObj();
     this.custItem = this.$store.state.custItem;
-    console.log( this.custItem," this.getItemObj() this.getItemObj()");
+    console.log(this.custItem, " this.getItemObj() this.getItemObj()");
   },
   methods: {
+    goInformain() {      
+      this.$router.push({
+        path: "/baseInformain",
+        query: this.$route.query
+      });
+    },
+    goRelation() {
+      this.$router.push({
+        path: "/relationInformain",
+        query: this.$route.query
+      });
+    },
+    goAccount() {
+      this.$router.push({
+        path: "/accountInformain",
+        query: this.$route.query
+      });
+    },
     ...mapActions({
-      getItemObj: "GET_ITEM_OBJ" 
+      getItemObj: "GET_ITEM_OBJ"
     })
   },
   components: {

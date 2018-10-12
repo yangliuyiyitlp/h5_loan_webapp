@@ -288,8 +288,9 @@ export default {
       this.$router.push({
         path: "/OrderDetails",
         query: {
-          crmApplayId: val.crmApplyId
+          crmApplayId: val.crmApplyId,
           // menuId: this.$route.query.menuId
+          types: 'loanType'
         }
       });
     },

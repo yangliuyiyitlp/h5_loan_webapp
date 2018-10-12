@@ -116,7 +116,8 @@ export default {
       this.$router.push({
         path: path,
         query: {
-          crmApplayId: this.$route.query.crmApplayId
+          crmApplayId: this.$route.query.crmApplayId,          
+          types: this.$route.query.types
         }
       });
     },

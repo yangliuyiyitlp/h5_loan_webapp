@@ -213,10 +213,11 @@ export default {
       item.custType = "custType"; //区分是从客户进到基本信息
       this.setItemObj(item);
       this.$router.push({
-        path: "/customerDet"
-        // query: {
-        //   crmCustInfoId: item.crmCustInfoId
-        // }
+        path: "/customerDet",
+        query: {
+          crmCustInfoId: item.crmCustInfoId,
+          types: 'custType'
+        }
       });
     },
     selectCustFn(flag, type, $event, targetIndex, item) {

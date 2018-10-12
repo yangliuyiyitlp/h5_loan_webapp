@@ -248,7 +248,8 @@ export default {
         path: "/OrderDetails",
         query: {
           crmApplayId: val.applyId,
-          orderStatus: val.orderStatus
+          orderStatus: val.orderStatus,
+           types: 'orderType'
           // menuId: this.$route.query.menuId
         }
       });
